@@ -31,9 +31,9 @@ I usually adapt the course as we go, so I suggest to access the materials online
 ## Column 1
 
 ### Outline
-Veel data zijn complex en gevarieerd. Door de juiste analsysemethoden te gebruiken kan de impact die dat heeft op processen en watnschap worden vergroot. In een hedendaagse data science workflow worden machine learning methoden steeds vaker ingezet om de waarde van big data te benutten. Tijdens de opleiding Data Science & Predictive Machine Learning leer je de laatste ontwikkelingen op het terrein van voorspellen, modelleren en analyse en leer je hoe je de informatie uit data op waarde kunt schatten. Je gaat de theorie zelf toepassen in het programma R. 
+Veel data zijn complex en gevarieerd. Door de juiste analysemethoden te gebruiken kan de impact die dat heeft op processen en wetenschap worden vergroot. In een hedendaagse data science workflow worden machine learning methoden steeds vaker ingezet om de waarde van big data te benutten. Tijdens de opleiding Data Science & Predictive Machine Learning leer je de laatste ontwikkelingen op het terrein van voorspellen, modelleren en analyse en leer je hoe je de informatie uit data op waarde kunt schatten. Je gaat de theorie zelf toepassen in het programma R. 
 
-Meer informatie en details zijn te vinden op [deze cursus pagina](https://www.eur.nl/erasmusacademie/cursus/opleiding-data-science-predictive-machine-learning))
+Meer informatie en details zijn te vinden op [deze cursus pagina](https://www.eur.nl/erasmusacademie/cursus/opleiding-data-science-predictive-machine-learning)
 
 ### Locatie
 Alle cursusdagen zijn in het gebouw van de [VNAB](https://www.google.com/maps/place/VNAB+knowledge+and+meeting/@51.91467,4.4871983,15z/data=!4m5!3m4!1s0x0:0xb3604a5c4a4bc363!8m2!3d51.91467!4d4.4871983). Een online live stream is beschikbaar voor alle deelnemers binnen de MS Teams omgeving van de cursus. 
