@@ -125,17 +125,17 @@ Naturally, you will need internet access for these services to be accessed. Wire
 ## Column 1
 
 ### Materials
-Ik pas mijn onderwijs meestal aan de doelgroep aan. Daardoor kunnen onderwijsmaterialen soms zelfs gedurende de dag kunnen veranderen of uitgebreid worden. Om er zeker van te zijn dat je de laatste iteratie van de cursusmaterialen hebt, adviseer ik om de materialen online te bekijken. 
+Ik pas mijn onderwijs meestal aan de doelgroep aan. Daardoor kunnen onderwijsmaterialen soms zelfs gedurende de dag veranderen of uitgebreid worden. Om er zeker van te zijn dat je de laatste iteratie van de cursusmaterialen hebt, adviseer ik om de materialen online te bekijken. 
 
 - Part A: Introduction
-    - [Lecture A]()
-    - [Practical A]()
+    - [Lecture A](Day 1/Part A/Lecture-A.html)
+    - [Practical A](Day 1/Part A/Practical_A_walkthrough.html)
 - Part B: Estimation, testing and prediction 
-    - [Lecture B]()
-    - [Practical B]()
+    - [Lecture B](Day 1/Part B/Lecture_B.html)
+    - [Practical B](Day 1/Part B/Exercise_B.html)
 - Part C: Assumptions and influence
-    - [Lecture C]()
-    - [Practical C]()
+    - [Lecture C](Day 1/Part C/Lecture_C.html)
+    - [Practical C](Day 1/Part C/Exercise_C.html)
 
 Alle collegeslides zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen.  
 
@@ -154,4 +154,4 @@ De bovenstaande referenties zijn nuttig en linken aan de cursusmaterialen voor v
 <p><a href="https://vimeo.com/178485416">What is R Markdown?</a> from <a href="https://vimeo.com/rstudioinc">RStudio, Inc.</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
 </center>
 
-Zie ook [this `rmarkdown` cheat sheet](Contents/Day 1/rmarkdown-reference_sheet.pdf). 
+Zie ook [this `rmarkdown` cheat sheet](Day 1/rmarkdown-reference_sheet.pdf). 
