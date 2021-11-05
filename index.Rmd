@@ -137,7 +137,14 @@ Ik pas mijn onderwijs meestal aan de doelgroep aan. Daardoor kunnen onderwijsmat
     - [Lecture C](Day 1/Part C/Lecture_C.html)
     - [Practical C](Day 1/Part C/Exercise_C.html)
 
-Alle collegeslides zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen.  
+Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen.  
+
+### Als je meer over `R` wilt leren
+Zie onderstaande links. 
+
+- Ik heb [deze cursus met video walkthroughs](https://www.gerkovink.com/prepR/#exercises) om mensen snel wegwijs te maken met scripten in `R`
+- [Dit is mijn postgraduate `R`-cursus](https://www.gerkovink.com/R) die ik de afgelopen 10 jaar heb ontwikkeld
+- [standardized regression vs Pearson's correlation](Day 1/standardized-regression.html)
 
 ## Column 2
 
