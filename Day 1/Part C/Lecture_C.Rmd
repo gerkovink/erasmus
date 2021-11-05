@@ -315,7 +315,7 @@ c(x.bar - t.crit * SEM, x.bar + t.crit * SEM)
 
 ## {.smaller}
 <center>
-<img src="Neyman1934.png" alt="HTML5 Icon" width = 99%>
+<img src="Neyman1934.png" alt="HTML5 Icon" width = 75%>
 </center>
 
         Neyman, J. (1934). On the Two Different Aspects of the Representative Method: 
@@ -369,10 +369,8 @@ ggplot(results, aes(y=Mean, x=1:100, colour = Covered)) +
 
 100 simulated samples from a population with $\mu = 0$ and $\sigma^2=1$. Out of 100 samples, only 5 samples have confidence intervals that do not cover the population mean.
 
-## Next week:
-
-- Model validation and resampling
-- Classification
-- K-nearest neighbors
-
-
+## For fun
+<center> 
+![](img/going_out_for_a_byte.png){width=40%}
+<br>[source](https://www.reddit.com/r/ProgrammerHumor/comments/8za9b6/hello_i_am_your_server_for_today/)
+</center>

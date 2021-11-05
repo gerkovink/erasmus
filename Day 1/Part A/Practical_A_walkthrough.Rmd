@@ -1,5 +1,5 @@
 ---
-title: "Practical A"
+title: "Exercise A"
 author: "Gerko Vink"
 date: "Data Science and Predictive Machine Learning"
 output: 
@@ -45,9 +45,10 @@ printAnswers <- TRUE
 
 ---
 
-#### Exercises
+# Exercises
 
 These exercises yield a quick introduction of basic data wrangling, pipes and visualization in `R`. 
+
 ---
 
 The following packages are required for this practical:
@@ -64,6 +65,10 @@ set.seed(123)
 
 ---
 
+## Exercise 1
+
+---
+
 1. **Use a pipe to do the following:**
 
 - draw 1000 values from a normal distribution with `mean = 5` and `sd = 1` - $N(5, 1)$, 
@@ -77,12 +82,20 @@ rnorm(1000, 5) %>%
 
 ---
 
+## Exercise 2
+
+---
+
 2. **Use a pipe to calculate the correlation matrix on the `anscombe` data set**
 
 ```{r}
 anscombe %>%
   cor()
 ```
+
+---
+
+## Exercise 3
 
 ---
 
@@ -99,6 +112,10 @@ Alternatively, we can use the `%$%` pipe from package `magrittr` to make this pr
 anscombe %$%
   cor(x4, y4)
 ```
+
+---
+
+## Exercise 4
 
 ---
 
@@ -124,6 +141,10 @@ boys %$%
   cor(hgt, wgt, use = "pairwise.complete.obs")
 ```
 The `%$%` pipe *exposes* the listed dimensions of the `boys` dataset, such that we can refer to them directly. 
+
+---
+
+## Exercise 5
 
 ---
 
@@ -160,6 +181,10 @@ Please note that the plots from `geom_histogram()` and `hist` use different calc
 
 ---
 
+## Exercise 6
+
+---
+
 6. **Create a bar chart for `reg` in the boys data set**
 With a standard plotting device in `R`:
 
@@ -178,6 +203,10 @@ boys %>%
 ```
 
 Note that `geom_bar` by default plots the `NA`'s, while `barplot()` omits the `NA`'s without warning. If we would not like to plot the `NA`s, then a simple `filter()` (see exercise 2) on the `boys` data is efficient. 
+
+---
+
+## Exercise 7
 
 ---
 
@@ -204,6 +233,10 @@ boys %>%
 
 ---
 
+## Exercise 8
+
+---
+
 8. **In the `boys` data set, `hgt` is recorded in centimeters. Use a pipe to transform `hgt` in the `boys` dataset to height in meters and verify the transformation**
 
 Using the standard `%>%` and the `%$%` pipes:
@@ -212,6 +245,10 @@ boys %>%
   transform(hgt = hgt / 100) %$%
   mean(hgt, na.rm = TRUE)
 ```
+
+---
+
+## Exercise 9
 
 ---
 
@@ -237,6 +274,10 @@ boys %>%
 ![](img/flow_t_pipe.png)
 
 We can see that there is indeed a literal T-junction. Naturally, we can expand this process with more `%T>%` pipes. However, once a pipe gets too long or too complicated, it is perhaps more useful to cut the piped problem into smaller, manageable pieces. 
+
+---
+
+## Exercise 10
 
 ---
 
@@ -278,6 +319,10 @@ boys %>%
 
 ---
 
+## Exercise 11
+
+---
+
 11. **Create a diverging bar chart for `hgt` in the `boys` data set, that displays for every `age` year that year's mean height in deviations from the overall average `hgt`**
 
 Let's not make things too complicated and just focus on `ggplot2`:
@@ -307,6 +352,10 @@ boys %>%
 ```
 
 The `na.rm` argument ensures that the mean and sd of only the observed values in each category are used.
+
+---
+
+## Exercise 12
 
 ---
 

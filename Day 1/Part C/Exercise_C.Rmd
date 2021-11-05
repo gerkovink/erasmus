@@ -1,7 +1,7 @@
 ---
-title: "Exercise 7"
+title: "Exercise C"
 author: "Gerko Vink"
-date: "Fundamental Techniques in Data Science with R"
+date: "Data Science and Predictive Machine Learning"
 output: 
    html_document:
     toc: true
@@ -41,9 +41,7 @@ pre { /* Code block - determines code spacing between lines */
   
 ---
 
-In this practical I detail multiple skills and show you a workflow for (predictive) analytics. Since these skills are vital for the assignment, I would like you to focus on understanding the code and I give you the answers and interpretations of the analyses. Therefore it is not necessary to hand in any exercise this week.
-
-Feel free to ask me, if you have questions. 
+In this practical I detail multiple skills and show you a workflow for (predictive) analytics. 
 
 All the best, 
 
@@ -51,7 +49,7 @@ Gerko
 
 ---
 
-#### Exercises
+# Exercises
 
 ---
 
@@ -64,6 +62,10 @@ library(ggplot2)
 library(DAAG)
 library(MASS)
 ```
+
+---
+
+## Exercise 1
 
 ---
 
@@ -88,6 +90,10 @@ elastic %>%
 ```
 
 The results seem very consistent: Data set `elastic2` has more observations over a larger range, but both sets result in roughly the same regression line. Data set `elastic1` seems to have an *odd-one-out* value.
+
+---
+
+## Exercise 2
 
 ---
 
@@ -134,6 +140,10 @@ This is due to the larger range of values in `elastic2`, and the absence of an o
 
 ---
 
+## Exercise 3
+
+---
+
 3. **Study the *residual vs leverage* plots for both models. Hint use `plot()` on the fitted object**
 
 ```{r}
@@ -151,6 +161,10 @@ As we can see, case 7 has the largest residual.
 ---
 
 Because there is a single value that influences the estimation and is somewhat different than the other values, a robust form of regression may be advisable to obtain more stable estimates. When robust methods are used, we refrain from omitting a suspected outlier from our analysis. In general, with robust analysis, influential cases that are not conform the other cases receive less weight in the estimation procedure then under non-robust analysis.
+
+---
+
+## Exercise 4
 
 ---
 
@@ -223,11 +237,19 @@ in the ordinary `lm()` regression.
 
 ---
 
+## Exercise 5
+
+---
+
 5. **Use the `elastic2` variable `stretch` to obtain predictions on the model fitted on `elastic1`.**
 
 ```{r}
 pred <- predict.lm(fit1, newdata = data.frame(stretch = elastic2$stretch))
 ```
+
+---
+
+## Exercise 6
 
 ---
 
@@ -268,6 +290,10 @@ The mammalsleep dataset is part of `mice`. It contains the Allison and Cicchetti
 
 --- 
 
+## Exercise 7
+
+---
+
 7. **Fit and inspect a model where `brw` is modeled from `bw`**
 ```{r}
 mammalsleep %$%
@@ -280,6 +306,10 @@ mammalsleep %$%
   lm(brw ~ bw) %>%
   summary()
 ```
+
+---
+
+## Exercise 8
 
 ---
 
@@ -299,6 +329,10 @@ mammalsleep %$%
 ```
 
 The analysis we ran is in fact equivalent to running a fixed effects model on clusters of size 1. Since in that scenario there is no clustering, we should omit the fixed effect for `species` and just model the random variation (in this case done by the residual variance).
+
+---
+
+## Exercise 9
 
 ---
 
@@ -345,6 +379,10 @@ fit %>%
   summary()
 ```
 and we have obtained a very high $R^2$. If prediction was our goal, we are doing great.
+
+---
+
+## Exercise 10
 
 ---
 

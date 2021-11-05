@@ -67,6 +67,10 @@ Gerko
 
 ---
 
+## Exercise 1
+
+---
+
 1. **Fit the following linear models on the anscombe data:**
 
 - `y1` predicted by `x1` - stored in object `fit1`
@@ -90,6 +94,10 @@ fit4 <- anscombe %$%
 
 ---
 
+## Exercise 2
+
+---
+
 2. **`Display a data frame with the coefficients of the 4 fitted objects from Exercise 1**
 
 Use the following code to markup your output into a nice format
@@ -107,6 +115,10 @@ output
 
 ---
 
+## Exercise 3
+
+---
+
 3. **Inspect the estimates for the four models in the `output` object. What do you conclude?**
 
 ```{r echo = printAnswers}
@@ -116,6 +128,10 @@ output
 ---
 
 # Plotting the relation
+
+---
+
+## Exercise 4
 
 ---
 
@@ -143,6 +159,10 @@ anscombe %>%
 
 ---
 
+## Exercise 5
+
+---
+
 5. **Plot the four pairs of variables from Exercise 1 in a single plotting window. Make the points in the plots `blue`, `gray`, `orange` and `purple`, respectively. **
 
 In other words, create the following plot:
@@ -160,6 +180,10 @@ gg
 
 ---
 
+## Exercise 6
+
+---
+
 6. **Add a regression line to the plot for only the pairs `(y3, x3)` and `(y4, x4)` where the line inherits the colour from the respective points.**
 Hint: use `geom_smooth()`.
 ```{r echo = printAnswers}
@@ -167,6 +191,10 @@ gg + # take the plot under #5 as the starting point
   geom_smooth(aes(x = x3, y = y3), method = "lm", se = FALSE, color = "orange") + 
   geom_smooth(aes(x = x4, y = y4), method = "lm", se = FALSE, color = "purple")
 ```
+
+---
+
+## Exercise 7
 
 ---
 
@@ -185,6 +213,10 @@ gg + # take the plot under #5 as the starting point
 ---
 
 ## Inspect `fit1`
+
+---
+
+### Exercise 8
 
 ---
 
@@ -207,6 +239,10 @@ plot(fit1)
 
 ---
 
+### Exercise 9
+
+---
+
 9. **Inspect the assumptions for the model `fit2`. What do you think?**
 
 ```{r echo=printAnswers2, eval = printAnswers2}
@@ -221,6 +257,10 @@ plot(fit2)
 ---
 
 ## Inspect `fit3`
+
+---
+
+### Exercise 10
 
 ---
 
@@ -241,6 +281,10 @@ plot(fit3)
 
 ---
 
+### Exercise 11
+
+---
+
 11. **Inspect the assumptions for the model `fit4`. What do you think?**
 
 ```{r echo=printAnswers2, eval = printAnswers2}
@@ -252,3 +296,6 @@ plot(fit3)
 plot(fit4)
 ```
 
+---
+
+End of practical exercises

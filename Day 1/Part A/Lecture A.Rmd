@@ -22,7 +22,11 @@ knitr::opts_chunk$set(echo = TRUE)
 5. Visualization with `ggplot2`
 
 ## Disclaimer
-When figures and other external sources are shown, the references are included when the origin is known. 
+I owe a debt of gratitude to many people as the thoughts and teachings in my slides are the process of years-long development cycles and discussions with my team, friends, colleagues and peers. When someone has contributed to the content of the slides, I have credited their authorship. 
+
+When figures and other external sources are shown, the references are included when the origin is known.
+
+Opinions are my own. 
 
 ## Course page
 You can find all materials at the following location:
@@ -50,12 +54,18 @@ Expertise: Missing data theory, statistical programming, computational evaluatio
 
 ## Topics
 
-| Week # | Focus | 
-|--------|---------------------|
-| 1 | Intro, modeling and regression |
-| 2 | Classification and Crossvalidation |
-| 3 | Regularisation |
-| 4 | Support Vector Machines and non-linear predictions |
+### Week 1
+Introduction to it all, modeling, least-squares estimation, linear regression, assumptions, model fit and complexity, intervals.
+
+### Week 2
+Test/training splits, crossvalidation, curse of dimensionality, underfitting and overfitting, bias/variance trade-off, logistic regression, classification and prediction, prediction evaluation, marginal likelihood, model interpretability, k-nearest neighbours and a peak into unsupervised clustering. 
+
+### Week 3
+The curse of dimensionality on steroids, how to avoid overfitting, problems with least squares estimation, ridge regression, the lasso, elastic net regularization, model interpretability.
+
+### Week 4
+Support vector machines and non-linear predictions. BYOD. 
+
 
 ## Schedule
 <center>
@@ -65,29 +75,22 @@ Expertise: Missing data theory, statistical programming, computational evaluatio
 # Introduction to SLV
 
 ## Goals in data analysis
-
+<div style="float: left; width: 50%;">
 - **Description**: <br> What happened?
 - **Prediction**: <br> What will happen?
+</div>
+
+<div style="float: right; width: 50%;">
 - **Explanation**: <br> Why did/does something happen?
 - **Prescription**: <br> What should we do?
-
-## In this course
-- **Exploratory Data Analysis**: <br> 
-Describing interesting patterns: use graphs, summaries, to understand
-subgroups, detect anomalies, understand the data <br>
-Examples: boxplot, five-number summary, histograms, missing data plots, ...
-
-- **Supervised learning**: <br>
-Regression: predict continuous labels from other values.<br>
-Examples: linear regression, support vector machines, regression trees, ... <br> Classification: predict discrete labels from other values. <br>
-Examples: logistic regression, knn, ...
-
+</div>
+<br>
 <center>
 ![](img/classification-regression.png){width=50%} <br>
 [image source](https://www.researchgate.net/publication/326175998_Analysis_of_Control_Attainment_in_Endogenous_Electroencephalogram_Based_Brain_Computer_Interfaces)
 </center>
 
-## Exploratory Data Analysis workflow
+## Exploratory data analysis workflow
 <center>
 ![](img/eda_flow.png) <br>
 [image source](https://www.researchgate.net/publication/326175998_Analysis_of_Control_Attainment_in_Endogenous_Electroencephalogram_Based_Brain_Computer_Interfaces)
@@ -129,7 +132,7 @@ Challenger space shuttle - 28 Jan 1986 - 7 deaths
 
 ## How wages differ
 <center>
-![](img/ISLR.png){width=70%}
+![](img/ISLR.png){width=60%}
 </center> <br>
 [Source: ISLR2, pp. 2](https://web.stanford.edu/~hastie/ISLR2/ISLRv2_website.pdf)
 
@@ -179,7 +182,7 @@ however;
 
 ## Thought
 <center>
-![](img/measlescompress.gif){width=90%}
+![](img/measlescompress.gif){width=60%}
 </center>
 [Source: Mike Lee](https://www.mikelee.co/animation/2017-06-28-wsj-measles-vaccination-chart/)
 
@@ -188,11 +191,12 @@ however;
 ## Wrangling in the pipeline
 
 Data wrangling is the process of transforming and mapping data from one "raw" data form into another format. 
+
   - The process is often iterative
   - The goal is to add purpose and value to the data in order to maximize the downstream analytical gains
 
 <center>
-![](img/wrangle.png){width=100%}
+![](img/wrangle.png){width=80%}
 </center>
 [Source: R4DS](https://r4ds.had.co.nz/wrangle-intro.html)
 
@@ -206,8 +210,6 @@ Data wrangling is the process of transforming and mapping data from one "raw" da
 
 [Source: Trifacta](https://www.trifacta.com/data-wrangling/)
 
-# Some scripting and coding 
-
 # Pipes
 
 ## This is a pipe:
@@ -218,7 +220,7 @@ boys <-
   head()
 ```
 
-It effectively replaces `head(read_csv("boys.txt"))`.
+It effectively replaces `boys <- head(read_csv("boys.txt"))`.
 
 <img src="img/pipe.jpg" style="display:block;width:500px;margin-left:auto;margin-right:auto"></img>
 
@@ -236,16 +238,22 @@ Benefit: a single object in memory that is easy to interpret
 <center>
 <img src="img/flow_pipe.png" alt="HTML5 Icon" width = 65%>
 </center>
+<br>
+This pipe is included in package `dplyr` in `R`. 
 
 ## The `%$%` pipe
 <center>
-<img src="img/flow_$_pipe.png" alt="HTML5 Icon" width = 65%>
+<img src="img/flow_$_pipe.png" alt="HTML5 Icon" width = 50%>
 </center>
+<br>
+This pipe is not included in package `dplyr` in `R`. You need package `magrittr` for this. 
 
 ## The `%T>%` pipe
 <center>
 <img src="img/flow_T_pipe.png" alt="HTML5 Icon" width = 80%>
 </center>
+<br>
+This pipe is also not included in package `dplyr` in `R`. You need package `magrittr` for this. 
 
 ```{r echo = FALSE, message = FALSE, warning=FALSE}
 library(mice)
@@ -268,11 +276,24 @@ mice::boys %>%
 
 The `.` can be used as a placeholder in the pipe. 
 
+## However ...
+```{r error=TRUE}
+mice::boys %$% 
+  lm(age ~ .)
+```
+should be substituted by
+```{r}
+mice::boys %$% 
+  lm(age ~ ., data = .) 
+```
+
 # Visualization 101
 
 ## Why visualise?
 
 - We can process a lot of information quickly with our eyes
+  - Our eyes can transfer up to `10^7` bits per second to our brain
+  - Through reading we can transfer up to `10^3` bits per second to our brain
 - Plots give us information about
     - Distribution / shape
     - Irregularities
@@ -285,7 +306,7 @@ The `.` can be used as a placeholder in the pipe.
 
 ## Why visualise?
 
-<img src="img/anscombe.svg" style="display:block;width:80%;margin:0 auto;"></img>
+<img src="img/anscombe.svg" style="display:block;width:70%;margin:0 auto;"></img>
 <p style="text-align:center;font-style:italic;font-size:0.5em;">Source: Anscombe, F. J. (1973). "Graphs in Statistical Analysis". American Statistician. 27 (1): 17–21.</p>
 
 
@@ -342,7 +363,7 @@ boys %>%
 
 Create the plot
 ```{r, fig.align='center', dev.args=list(bg="transparent"), warning=FALSE, message=FALSE}
-gg <- 
+A <- 
   boys %>%
   ggplot(aes(x = age, y = bmi)) +
   geom_point(col = "dark green")
@@ -350,29 +371,29 @@ gg <-
 
 Add another layer (smooth fit line)
 ```{r, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
-gg <- gg + 
+B <- A + 
   geom_smooth(col = "dark blue")
 ```
 
 Give it some labels and a nice look
 ```{r, fig.align='center', dev.args=list(bg="transparent")}
-gg <- gg + 
+C <- B + 
   labs(x = "Age", y = "BMI", title = "BMI trend for boys") +
   theme_minimal()
 ```
 
 ## Why this syntax?
 ```{r, warning=FALSE, message=FALSE, fig.align='center', dev.args=list(bg="transparent")}
-plot(gg)
+plot(C)
 ```
 
 ## Why this syntax?
-<img src="img/ggani.gif" style="display:block;width:80%;margin:0 auto;"></img>
+<img src="img/ggani.gif" style="display:block;width:70%;margin:0 auto;"></img>
 
 ## For fun
 <center> 
-![](img/going_out_for_a_byte.png){width=40%}
+![](img/math.png){width=40%}
 </center>
-[source](https://www.reddit.com/r/ProgrammerHumor/comments/8za9b6/hello_i_am_your_server_for_today/)
+[source](https://www.reddit.com/r/ProgrammerHumor/comments/p0fa6g/hold_the_math_please/)
 
 
