@@ -162,3 +162,32 @@ De bovenstaande referenties zijn nuttig en linken aan de cursusmaterialen voor v
 </center>
 
 Zie ook [this `rmarkdown` cheat sheet](Day 1/rmarkdown-reference_sheet.pdf). 
+
+# Dag 2
+
+## Column 1
+
+### Materials
+Ik pas mijn onderwijs meestal aan de doelgroep aan. Daardoor kunnen onderwijsmaterialen soms zelfs gedurende de dag veranderen of uitgebreid worden. Om er zeker van te zijn dat je de laatste iteratie van de cursusmaterialen hebt, adviseer ik om de materialen online te bekijken. 
+
+- Part D: Introductie in Logistische regressie en classificatie
+    - [Lecture D](Day 1/Part D/Lecture-A.html)
+    - [Practical D](Day 1/Part D/Practical_A_walkthrough.html)
+    - [titanic.csv](Day 2/Part D/titanic.csv)
+- Part E: Logistische regressie interpreteren
+    - [Lecture E](Day 2/Part E/Lecture_E.html)
+    - [Practical E](Day 2/Part E/Exercise_E.html)
+- Part F: KNN en K-Means
+    - [Lecture F](Day 2/Part F/Lecture_F.html)
+    - [Practical F](Day 2/Part F/Exercise_F.html)
+
+Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen.  
+
+
+## Column 2
+
+### Useful references
+
+- [Het `caret` boek](https://topepo.github.io/caret/index.html)
+
+De bovenstaande referenties zijn nuttig en linken aan de cursusmaterialen voor vandaag. 
