@@ -67,8 +67,6 @@ library(magrittr)
 library(DAAG)
 ```
 
-#### Exercises
-
 ---
 
 The following table shows numbers of occasions when inhibition (i.e., no flow of current across a membrane) occurred within 120 s, for different concentrations of the protein peptide-C. The outcome `yes` implies that inhibition has occurred.

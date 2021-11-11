@@ -1,5 +1,5 @@
 ---
-title: "Exercises E"
+title: "Exercises D"
 author: "Gerko Vink"
 date: "Data Science and Predictive Machine Learning"
 output: 
@@ -42,203 +42,228 @@ pre { /* Code block - determines code spacing between lines */
 We use the following packages:
 ```{r warning=FALSE, message=FALSE}
 library(mice)
+library(caret)
 library(dplyr)
 library(magrittr)
 library(DAAG)
+library(readr)
 ```
 
 ---
 
-The following table shows numbers of occasions when inhibition (i.e., no flow of current across a membrane) occurred within 120 s, for different concentrations of the protein peptide-C. The outcome `yes` implies that inhibition has occurred.
-
-    conc 0.1 0.5  1 10 20 30 50 70 80 100 150 
-    no     7   1 10  9  2  9 13  1  1   4   3 
-    yes    0   0  3  4  0  6  7  0  0   1   7
-
----
-
----
-
-We use the following packages:
-```{r warning=FALSE, message=FALSE}
-library(mice)
-library(dplyr)
-library(magrittr)
-library(DAAG)
-```
-
-#### Exercises
-
----
-
-The following table shows numbers of occasions when inhibition (i.e., no flow of current across a membrane) occurred within 120 s, for different concentrations of the protein peptide-C. The outcome `yes` implies that inhibition has occurred.
-
-    conc 0.1 0.5  1 10 20 30 50 70 80 100 150 
-    no     7   1 10  9  2  9 13  1  1   4   3 
-    yes    0   0  3  4  0  6  7  0  0   1   7
-
----
-
-# Exercises
-
----
-
-1. **Create this data in `R`. Make it into a data frame.**
-```{r}
-data <- data.frame(conc = c(.1, .5, 1, 10, 20, 30, 50, 70, 80, 100, 150),
-                   no = c(7, 1, 10, 9, 2, 9, 13, 1, 1, 4, 3),
-                   yes = c(0, 0, 3, 4, 0, 6, 7, 0, 0, 1 ,7)) 
-data
-```
-
-
----
-
-2. **Add the following three new variables (columns) to the data**
-
-- the margin of `no` and `yes` over the rows (i.e. `no` + `yes`)
-- the proportion (`yes` over `margin`)
-- the logodds
-
-First, we create a function to calculate the logit (logodds):
-```{r}
-logit <- function(p) log(p / (1 - p))
-```
-
-Then we add the new columns
-```{r}
-data <- 
-  data %>% 
-  mutate(margin = no+yes,
-         prop = yes / margin,
-         logit = logit(prop)) # apply the function
-```
-
----
-
-3. **Inspect the newly added columns in thw data set. What do you see?**
-```{r}
-data
-```
-
-There are a lot of zero proportions, hence the $-\infty$ in the logit. You can fix this (at least the interpretation of the `logodds`) by adding a constant (usually 0.5) to all cells conform the empirical `logodds` [(see e.g. Cox and Snell 1989)](http://www.amazon.com/Analysis-Edition-Monographs-Statistics-Probability/dp/0412306204). 
-
-Another option is to add a value of `1`. This is conceptually interesting as the log of `1` equals `r log(1)`. 
-
----
-
-4. **Add a new column where the log odds are calculated as:**
-$$\log(\text{odds}) = \log\left(\frac{\text{yes} + 0.5}{\text{no} + 0.5}\right)$$
-```{r}
-logitCandS <- function(yes, no) log((yes + .5) / (no + .5))
-data <- 
-  data %>% 
-  mutate(logitCS = logitCandS(yes, no))
-data
-```
-We can now see that the $-\infty$ proportions are gone.
-
----
-
-5. **Fit the model with `margin` as the weights, just like the model in slide 44 from this week's lecture**
-```{r}
-fit <- 
-  data %$%
-  glm(prop ~ conc, family=binomial, weights=margin)
-```
-
----
-
-6. **Look at the summary of the fitted object**
-```{r}
-summary(fit)
-```
-
-A unit increase in `conc` increases the $\log(\text{odds})$ of `prop` with `0.01215`. This increase is significant. 
-
----
-
-Just like with a linear model, we can obtain a series of plots for inspecting the logistic model. 
-
----
-
-7. **Inspect the plots number 1 and 5 for object `fit`**
-```{r}
-plot(fit, which = c(1, 5))
-```
-
-The data set is small, but case `11` stands out in the `Residuals vs. Leverage` plot. Case 11 has quite a lot of leverage, although its residual is not out of the ordinary. Its leverage, however is sufficient to yield it a Cook's distance of over 1. Further investigation is warranted. 
-
----
-
-Many models are built around the assumption of normality. Even in cases when this assumption is not strict, modeling efforts may benefit from a transformation towards normality. A transformation that is often used for skewed data is the log-transformation.
-
----
-
-8. **`conc` is somewhat skewed. Plot the density of the `conc` column twice:**
-
-- once as observed
-- once with a log-tranformation
-
-```{r echo = FALSE}
-par(mfrow = c(1, 2)) # change parameter of plotting to 2 plots side-by-side
-data$conc %>%
-  density() %>%
-  plot(main = "density", xlab = "conc")
-data$conc %>% 
-  log() %>%
-  density() %>%
-  plot(main = "density", xlab = "log(conc)")
-```
-
-In this case the transformation towards normality is not very apparent due to the small sample size. If we take, e.g. from the `mice::mammalsleep` data set the column `bw` (body weigth), the log-transformation is very beneficial:
+We use the `titanic` data set for this exercise. Download the [`titanic.csv`](titanic.csv) data set. 
 
 ```{r}
-par(mfrow = c(1, 2)) # change parameter of plotting to 2 plots side-by-side
-mammalsleep %$%
-  density(bw) %>%
-  plot(main = "density", xlab = "body weight")
-
-mammalsleep %$% 
-  log(bw) %>%
-  density() %>%
-  plot(main = "density", xlab = "log(body weight)")
+con <- url("https://www.gerkovink.com/erasmus/Day%202/Part%20D/titanic.csv")
+titanic <- read_csv(con)
 ```
 
-I hope you all see that taking the log of `bw` in this case would make the predictor far more normal.
-
 ---
 
-We now return to the exercise and its data example with `prop` and `conc`.
-
----
-
-9. **Investigate the `log` model**
-
-To apply this transformation in the model directly, we best pose it in the `I()` function. `I()` indicates that any interpretation and/or conversion of objects should be inhibited and the contents should be evaluated 'as is'. For example, to run the model:
+__Exercise 1__ **Inspect the titanic data set by calling `titanic` in the console and with functions `summary()`, `str()` and `md.pattern()`.**
 
 ```{r}
-fit.log <- 
-  data %$%
-  glm(prop ~ I(log(conc)), family=binomial, weights=margin)
+titanic
+```
+We can see that the `titanic` data set is imported as a `tibble`. A `tibble` is a more flexible data frame with a much nicer printing class.
+```{r}
+summary(titanic)
+```
+The `summary()` output gives us direct information about the parametric nature of the columns is the data
+```{r}
+str(titanic)
+```
+When we study the structure of the data set, we see that the outcome `Survived` is not coded as a `factor`, but as a numeric column. The same holds for `Pclass`. This will influence the default estimation later on. There are more irregularities, but we'll ignore those for now.
+```{r}
+md.pattern(titanic, rotate.names = TRUE)
+```
+There are no missing values in this `titanic` data set. 
+
+---
+
+__Exercise 2__ **Correct the measurement level of the columns `Pclass` and `Survived`. Then ask for the `summary()` once more.**
+```{r}
+titanic %<>% 
+  mutate(Pclass = factor(Pclass, labels = c("1st class", "2nd class", "3rd class")), 
+         Survived = factor(Survived, labels = c("No", "Yes")))
+titanic %>% summary()
+```
+We now see the tabular information about the `Survived` and `Pclass` columns. This is because these columns are now coded as factors (i.e. categorical variables with a numeric representation). Note that in the `mutate` call, I used the ` %<>% ` pipe. This *assign* pipe returns the endresult of the pipe to the original object. This mitigates the use of the `<-` assign operator and the double calling of the `titanic` set in the regular strategy below:
+
+```{r eval = FALSE}
+titanic <- titanic %>% 
+  mutate(Pclass = factor(Pclass, labels = c("1st class", "2nd class", "3rd class")), 
+         Survived = factor(Survived, labels = c("No", "Yes")))
+```
+
+
+---
+
+# Data subsetting
+
+---
+
+__Exercise 3__ **Split the data manually into two parts: a training part (70% of cases) and a test part (30% of cases). Verify the dimensions of the splits with function `dim()`.**
+
+```{r}
+set.seed(123) # for reproducibility
+trainIndex <- createDataPartition(titanic$Survived, p = .7, times = 1, list = FALSE)
+
+train <- titanic[trainIndex, ]
+test <- titanic[-trainIndex, ]
+```
+We make use of the `createDataPartition()` function from package `caret` to generate the rownumbers for the splits. We could have also done this manually with e.g. `trainIndex <- sample(1:nrow(titanic), round(.7*nrow(titanic)), replace = TRUE)`. I find the `createDataPartition()` function always convenient, because it directly plugs into the `caret` functionality. 
+```{r}
+dim(train)
+dim(test)
+```
+We can see that the split with `r dim(train)[1]` cases in the `train` set and `r dim(test)[1]` cases in the `test` set approximates the desired `p = .7` split probability with `r dim(train)[1]/nrow(titanic)`.
+
+---
+
+# Linear model
+
+---
+
+__Exercise 3__ **Predict `Age` from `Pclass`, `Sex` and `Survived`. Train your model on the `train` set and validate it on the `test` set**
+```{r}
+fit <- train %$% 
+  lm(Age ~ Pclass + Sex + Survived) 
+pred <- fit %>% 
+  predict(newdata = test)
+```
+The `fit` object contains the model fitted on the training data. The `pred` object contains the predictions obtained by applying the `fit` model to the `test` data. 
+
+---
+
+__Exercise 4__ **Now calculate the RMSE and the $R^2$ for the predictions and compare those to the fitted model in `fit`**
+```{r}
+results <- data.frame(R2 = c(cor(pred, test$Age)^2, 
+                             summary(fit)$r.squared),
+                      RMSE = c((pred - test$Age)^2 %>% mean %>% sqrt, 
+                               fit$residuals^2 %>% mean %>% sqrt))
+rownames(results) <- c("predicted", "fitted")
+```
+We see that the $R^2$ is lower for the predictions and that the root mean squared error is higher. For unbiased estimators we can view the RMSE as the standard error of the estimator. The MSE would then be the variance of that unbiased estimator. 
+
+---
+
+__Exercise 5__ **Now use the `caret` package to do the same as above. Use the default paramters for the `train()` function and use the `train` data to train the model.**
+```{r}
+set.seed(123) # for reproducibility
+# train the model on training set
+model <- train(Age ~ Pclass + Sex + Survived,
+               data = train,
+               method = "lm")
+model
+```
+We see that the `train` function by default uses a Bootstrapped resampling: the `train` data is resampled with replacement 25 times and every time the model is evaluated. Every individual sample is slightly different and, hence, the distribution of obtained results is also different. We can get information about the variance from:
+```{r}
+model$results
 ```
 
 ---
 
-9. **Look at the summary of the fitted objects again**
+__Exercise 6__ **Now use the model from (5) to predict the `test` data and calculate the same metrics as in (4).**
+
 ```{r}
-summary(fit.log)
+pred <- predict(model, newdata = test)
+# R^2
+cor(pred, test$Age)^2
+# RMSE
+(pred - test$Age)^2 %>% mean %>% sqrt
 ```
-The logodds for `fit.log` now depict the unit increase in `log(conc)`, instead of `conc`.
+A much easier way of obtaining the same metrics is with the `postResample()` function:
+```{r}
+postResample(pred = pred, obs = test$Age)
+```
 
 ---
 
-10. **Inspects the plots number 1 and 5 of the fitted objects based on `log(conc)`**
+__Exercise 7__ **Rerun the model from (5), but use 10-fold cross-validation on the training set. Evaluate the predictions with `postResample()`.**
 ```{r}
-plot(fit.log, which = c(1, 5))
+set.seed(123) # for reproducibility
+model <- train(Age ~ Pclass + Sex + Survived,
+               data = train,
+               method = "lm",
+               trControl = trainControl(method = "cv", number = 10)
+               )
+model
+pred <- predict(model, newdata = test)
+postResample(pred, test$Age)
+```
+There's not much more we can do for this linear model. At least we now that the below model is not grossly overfitted and that, if new data would come in, there is not much accuracy in predicting `Age` from these predictors. Let's hope that never happens. 
+```{r}
+lm(Age ~ Pclass + Sex + Survived, data = titanic) %>% summary()
+```
+We can still infer that `Age` differs over these groups. The overall model is highly significant. 
+
+---
+
+# Logistic regression
+
+---
+
+__Exercise 8__ **Use the same train/test splits to evaluate the performance of a logistic model where `Survived` is predicted from `Age`, `Pclass` and `Sex`. Study the accuracy and the confusion matrix**
+
+We start by specifying the `caret` model. 
+```{r}
+set.seed(123) # for reproducibility
+model <- train(Survived ~ Age + Pclass + Sex,
+               data = train,
+               method = "glm",
+               family = binomial(link = "logit"),
+               trControl = trainControl(method = "cv", number = 10)
+               )
+model
+```
+We can ask for a confusion matrix over the crossvalidated sets. 
+```{r}
+confusionMatrix(model)
+```
+We see that a bit over 80% is accurately predicted. The off-diagonal holds the other almost 20%. 
+
+When we apply the model to the test data to obtain predictions, we can choose to get the `raw` predictions (i.e. the scale of the response as recorded in the data), or `prob` predictions (i.e. the scale of the response as modeled in probabilities). 
+```{r}
+pred <- predict(model, newdata = test, type = "raw")
+```
+The confusion matrix over the predictions yields many informative measures. 
+```{r}
+confusionMatrix(pred, test$Survived)
 ```
 
-Outliers are now less of an issue. This exercise demonstrates that data transformations may easily render our method more valid, but in exchange it makes our model interpretation more difficult: **Parameters now have to be assessed in the `log(conc)` parameter space**. 
+---
+
+__Exercise 9__  **Compare the model obtained with `caret`'s `train()` on with a model obtained with `glm()`. Fit the `glm()` model on the training set. Study accuracy and parameters. **
+We start with generating the relevant output from `glm()`. First, we fit the model with the correct family and link function
+```{r}
+fit <- train %$% 
+  glm(Survived ~ Age + Pclass + Sex, 
+      family = binomial(link = "logit"))
+```
+Next, we gemerate the predicted values:
+```{r}
+pred.glm <- ifelse(predict(fit, newdata = test, type = "response") > .5, "Yes", "No")
+```
+We have to indicate how to go from the predicted probabilities back to `No` and `Yes`. I use the `ifelse()` function to do that: if the probability is over .5, then the new value will be `Yes`, else it will be `No`. 
+
+Now we can enter this vector of predicted `Yes` and `No` in the `postResample()` function to compare it with the observations in `test$Survived`. 
+```{r}
+postResample(pred.glm, test$Survived)
+```
+Finally, we can obtain the parameter summary from the fitted model. 
+```{r}
+fit %>% summary
+```
+
+When we obtain the same information from the `caret` model, we see that there are no differences. 
+```{r}
+postResample(pred, test$Survived)
+model$finalModel %>% summary()
+```
+The outputs are identical. `caret` does not perform magical parameter poolings over the crossvalidated sets. The returned model is the fitted model. The accuracy that is obtained over the `train` set is obtained by meand of crossvalidation. The fitted model is in both cases identically applied to the `test` set. 
+
+That said, the modeling possibilities with `caret` are enormous and there are many modeling efforts possible that lead to a proper model training on a training set. Crossvalidation is then needed. A test set can then be used to evaluate the performance of the trained model on unseen data. 
 
 ---
 
