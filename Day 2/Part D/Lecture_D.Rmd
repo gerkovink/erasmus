@@ -148,8 +148,8 @@ $$\text{odds}(\text{heads}) = \frac{.5}{1 - .5} = 1$$
 The game [Lingo](lingo link) has 44 balls: 36 blue, 6 red and 2 green balls
 
 - The odds of a player choosing a blue ball are $$\text{odds}(\text{blue}) = \frac{36}{8} =  \frac{36/44}{8/44} = \frac{.8182}{.1818} = 4.5$$
-- The odds of a player choosing a red ball are $$\text{odds}(\text{blue}) = \frac{6}{38} = \frac{6/44}{36/44} = \frac{.1364}{.8636}\approx .16$$
-- The odds of a player choosing a blue ball are $$\text{odds}(\text{blue}) = \frac{2}{42} = \frac{2/44}{42/44} = \frac{.0455}{.9545}\approx .05$$
+- The odds of a player choosing a red ball are $$\text{odds}(\text{red}) = \frac{6}{38} = \frac{6/44}{36/44} = \frac{.1364}{.8636}\approx .16$$
+- The odds of a player choosing a green ball are $$\text{odds}(\text{green}) = \frac{2}{42} = \frac{2/44}{42/44} = \frac{.0455}{.9545}\approx .05$$
 
 Odds of 1 indicate an equal likelihood of the event occuring or not occuring. Odds `< 1` indicate a lower likelihood of the event occuring vs. not occuring. Odds `> 1` indicate a higher likelihood of the event occuring. 
 
