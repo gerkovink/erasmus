@@ -176,10 +176,10 @@ Ik pas mijn onderwijs meestal aan de doelgroep aan. Daardoor kunnen onderwijsmat
     - [titanic.csv](Day 2/Part D/titanic.csv)
 - Part E: Logistische regressie interpreteren
     - [Lecture E](Day 2/Part E/Lecture_E.html)
-    - [Practical E](Day 2/Part E/Exercise_E.html)
+    - [Practical E](Day 2/Part E/Practical_E.html)
 - Part F: KNN en K-Means
     - [Lecture F](Day 2/Part F/Lecture_F.html)
-    - [Practical F](Day 2/Part F/Exercise_F.html)
+    - [Practical F](Day 2/Part F/Practical_F.html)
 
 Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen.  
 
