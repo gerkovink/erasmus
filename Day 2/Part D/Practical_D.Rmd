@@ -143,6 +143,7 @@ results <- data.frame(R2 = c(cor(pred, test$Age)^2,
                       RMSE = c((pred - test$Age)^2 %>% mean %>% sqrt, 
                                fit$residuals^2 %>% mean %>% sqrt))
 rownames(results) <- c("predicted", "fitted")
+results
 ```
 We see that the $R^2$ is lower for the predictions and that the root mean squared error is higher. For unbiased estimators we can view the RMSE as the standard error of the estimator. The MSE would then be the variance of that unbiased estimator. 
 
