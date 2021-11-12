@@ -171,8 +171,8 @@ Zie ook [this `rmarkdown` cheat sheet](Day 1/rmarkdown-reference_sheet.pdf).
 Ik pas mijn onderwijs meestal aan de doelgroep aan. Daardoor kunnen onderwijsmaterialen soms zelfs gedurende de dag veranderen of uitgebreid worden. Om er zeker van te zijn dat je de laatste iteratie van de cursusmaterialen hebt, adviseer ik om de materialen online te bekijken. 
 
 - Part D: Introductie in Logistische regressie en classificatie
-    - [Lecture D](Day 1/Part D/Lecture-D.html)
-    - [Practical D](Day 1/Part D/Practical_D.html)
+    - [Lecture D](Day 2/Part D/Lecture_D.html)
+    - [Practical D](Day 2/Part D/Practical_D.html)
     - [titanic.csv](Day 2/Part D/titanic.csv)
 - Part E: Logistische regressie interpreteren
     - [Lecture E](Day 2/Part E/Lecture_E.html)
