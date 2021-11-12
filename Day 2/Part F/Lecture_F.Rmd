@@ -434,12 +434,3 @@ sim.data %>% ggplot +
   helpIAmColourblind
 ```
 
-## Conclusion
-
-- Supervised learning: outcome / target available
-- Unsupervised learning: no outcome / target
-- prediction & pattern recognition vs. estimation, inference, testing
-- knn: nonparametric classification
-- kmeans: clustering algorithm
-
-- With the power of `R` we can generate any data we want and know the 'truth'!
