@@ -190,4 +190,13 @@ Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je 
 
 - [Het `caret` boek](https://topepo.github.io/caret/index.html)
 
-De bovenstaande referenties zijn nuttig en linken aan de cursusmaterialen voor vandaag. 
+De bovenstaande referentie is nuttig en linked aan de cursusmaterialen voor vandaag. 
+
+
+### Questions answered
+
+Hieronder links naar antwoorden op gestelde vragen:
+
+- Waarom likelihood-based methoden een dispersie paramater van 1 vereisen, staat uitgelegd in [dit hoofdstuk](https://www.sagepub.com/sites/default/files/upm-binaries/21121_Chapter_15.pdf)
+- De techniek achter `rlm`'s M-estimation - en nog veel meer - [wordt hier besproken](http://www.stats.ox.ac.uk/~ripley/StatMethods/Robust.pdf). De schrijver - [Brian Ripley](https://en.wikipedia.org/wiki/Brian_D._Ripley) - is de auteur van veel `R` functionaliteit en een voorvechter van robust statistics. 
+
