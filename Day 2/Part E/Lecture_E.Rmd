@@ -332,11 +332,11 @@ rownames(out) <- c("Predicted Survived", "Predicted not.Survived")
 out
 ```
 
-- Sensitivity is calculated as $\text{Sensitivity} = A/(A+C) = \frac{463}{463+82} =$ `r 463/(463+82)`
-  - Sensitivity is the proportion of actual `Survived` that have been correctly predicted as `Survived`. 
+- Sensitivity is calculated as $\text{Sensitivity} = A/(A+C) = \frac{242}{100+242} =$ `r 242/(242+100)`
+  - Sensitivity is the proportion of actual `not Survived` that have been correctly predicted as `Survived`. 
   - Sensitivity is the *True Positive Rate*
   
-- Specificity is calculated as $\text{Specificity} = D/(B+D) = \frac{242}{100+242} =$ `r 242/(242+100)`
+- Specificity is calculated as $\text{Specificity} = D/(B+D) = \frac{463}{463+82} =$ `r 463/(463+82)`
   - Specificity is the proportion of actual `not Survived` that have been correctly predicted as `not Survived`. 
   - Specificity is the *True Negative Rate*
 

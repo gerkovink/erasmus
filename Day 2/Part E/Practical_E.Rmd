@@ -45,29 +45,11 @@ library(mice)
 library(dplyr)
 library(magrittr)
 library(DAAG)
+library(caret)
 ```
 
 ---
 
-The following table shows numbers of occasions when inhibition (i.e., no flow of current across a membrane) occurred within 120 s, for different concentrations of the protein peptide-C. The outcome `yes` implies that inhibition has occurred.
-
-    conc 0.1 0.5  1 10 20 30 50 70 80 100 150 
-    no     7   1 10  9  2  9 13  1  1   4   3 
-    yes    0   0  3  4  0  6  7  0  0   1   7
-
----
-
----
-
-We use the following packages:
-```{r warning=FALSE, message=FALSE}
-library(mice)
-library(dplyr)
-library(magrittr)
-library(DAAG)
-```
-
----
 
 The following table shows numbers of occasions when inhibition (i.e., no flow of current across a membrane) occurred within 120 s, for different concentrations of the protein peptide-C. The outcome `yes` implies that inhibition has occurred.
 
@@ -237,6 +219,97 @@ plot(fit.log, which = c(1, 5))
 ```
 
 Outliers are now less of an issue. This exercise demonstrates that data transformations may easily render our method more valid, but in exchange it makes our model interpretation more difficult: **Parameters now have to be assessed in the `log(conc)` parameter space**. 
+
+---
+
+11. **Use the `brandsma` data from package `mice` to fit a logistic regression model for `sex` based on `lpo` (Language Post Outcome).**
+```{r}
+brandsma.subset <- 
+  brandsma %>%
+  subset(!is.na(sex) & !is.na(lpo), select = c(sex, lpo))
+
+fit <- 
+  brandsma.subset %$%
+  glm(sex ~ lpo, family=binomial(link='logit'))
+
+fit %>%
+  summary()
+```
+
+With every unit increase in `lpo`, the logodds of gender increases by `r coef(fit)[2]`. 
+
+---
+
+12. **Obtain confidence intervals for the parameter estimates.**
+```{r}
+confint(fit)
+```
+
+---
+
+13. **Use the model parameters to predict the `sex` variable and compare your predictions to the observed `sex`. **
+
+We can obtain predictions by using function `predict`. The default predictions are on the scale of the linear predictors; the alternative "response" is on the scale of the response variable. Thus for a default binomial model the default predictions are of log-odds (probabilities on logit scale) and type = "response" gives the predicted probabilities. 
+
+To obtain the predicted logodds:
+```{r}
+pred.logodds <- 
+  fit %>%
+  predict()
+head(pred.logodds)
+```
+and the predicted probabilities
+```{r}
+pred.prob <- 
+  fit %>%
+  predict(type = "response")
+head(pred.prob)
+```
+
+We can then use the decision boundary `pred.prob > .5` to assign cases to `sex == 1` and the others to `sex == 0`. 
+```{r}
+pred <- factor(ifelse(pred.prob > .5, 1, 0))
+```
+
+To determine how many correct predictions we have, we can use
+```{r}
+obs <- 
+  brandsma %>%
+  filter(!is.na(sex) & !is.na(lpo)) # in order to obtain the same rows
+
+confusionMatrix(pred, factor(obs$sex))
+
+```
+So we succesfully predict a little over half the values. That is not so good, because, based on chance alone, we would expect to successfully predict about half:
+
+---
+
+An quick way to perform crossvalidation is with `DAAG::CVbinary()`:
+
+```{r}
+CVbinary(glm(sex ~ lpo, family=binomial(link='logit'), data = brandsma.subset))
+```
+
+---
+
+The lesson here is that a significant parameter has no meaning if the substantive interpretation of the effect is ignored. There is almost no relation, whatsoever, there is just sufficient data to deem the influence of `lpo` on `sex` worthy of significance. 
+
+---
+
+14. **In the data set `minor.head.injury` (from package `DAAG`), obtain a logistic regression model relating `clinically.important.brain.injury` to all the other variables.**
+
+Let us fit the model, predict `clinically.important.brain.injury` by all other variables in the data.
+```{r}
+fit <- glm(clinically.important.brain.injury ~ ., family=binomial, data=head.injury) 
+summary(fit)
+```
+
+
+---
+
+15. **Patients whose risk is sufficiently high will be sent for CT (computed tomography). Using a risk threshold of 0.025 (2.5%), turn the result into a decision rule for use of CT.**
+
+A risk of 2.5% corresponds to the cutoff for a CT scan. This translates to a logit of $\log\left(\frac{.025}{1-.025}\right) = -3.663562$. In other words, any sum of variables that "lifts" the intercept above -3.66 would satisfy the cutoff. 
 
 ---
 
