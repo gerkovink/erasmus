@@ -437,7 +437,11 @@ pred &lt;- fit %&gt;%
                              summary(fit)$r.squared),
                       RMSE = c((pred - test$Age)^2 %&gt;% mean %&gt;% sqrt, 
                                fit$residuals^2 %&gt;% mean %&gt;% sqrt))
-rownames(results) &lt;- c(&quot;predicted&quot;, &quot;fitted&quot;)</code></pre>
+rownames(results) &lt;- c(&quot;predicted&quot;, &quot;fitted&quot;)
+results</code></pre>
+<pre><code>##                  R2     RMSE
+## predicted 0.1802922 12.78799
+## fitted    0.2066340 12.57457</code></pre>
 <p>We see that the <span class="math inline">\(R^2\)</span> is lower for the predictions and that the root mean squared error is higher. For unbiased estimators we can view the RMSE as the standard error of the estimator. The MSE would then be the variance of that unbiased estimator.</p>
 <hr />
 <p><strong>Exercise 5</strong> <strong>Now use the <code>caret</code> package to do the same as above. Use the default paramters for the <code>train()</code> function and use the <code>train</code> data to train the model.</strong></p>
