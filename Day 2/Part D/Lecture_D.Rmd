@@ -1,7 +1,7 @@
 ---
 title: "Logistic regression"
 author: "Gerko Vink"
-date: "Fundamental Techniques in Data Science with R"
+date: "Data Science and Predictive Machine Learning"
 output:
   ioslides_presentation:
     smaller: yes
@@ -9,20 +9,13 @@ output:
     logo: logo.png
 ---
 
-## Packages and functions used
+## Packages used in this lecture
 ```{r message=FALSE}
 library(magrittr) # pipes
 library(dplyr)    # data manipulation
-library(mice)     # data
 library(ggplot2)  # plotting
 library(DAAG)     # data sets and functions
 ```
-
-- `glm()` Generalized linear models
-- `predict()` Obtain predictions based on a model
-- `confint()` Obtain confidence intervals for model parameters
-- `coef()` Obtain a model's coefficients
-- `DAAG::CVbinary()` Cross-validation for regression with a binary response
 
 ## So far
 
