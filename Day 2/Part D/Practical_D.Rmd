@@ -140,7 +140,7 @@ __Exercise 4__ **Now calculate the RMSE and the $R^2$ for the predictions and co
 ```{r}
 results <- data.frame(R2 = c(cor(pred, test$Age)^2, 
                              summary(fit)$r.squared),
-                      RMSE = c((pred - test$Age)^2 %>% mean %>% sqrt, 
+                      RMSE = c((pred - test$Age)^2 %>% sum %>% sqrt, 
                                fit$residuals^2 %>% mean %>% sqrt))
 rownames(results) <- c("predicted", "fitted")
 results
@@ -236,13 +236,14 @@ confusionMatrix(pred, test$Survived)
 ---
 
 __Exercise 9__  **Compare the model obtained with `caret`'s `train()` on with a model obtained with `glm()`. Fit the `glm()` model on the training set. Study accuracy and parameters. **
+
 We start with generating the relevant output from `glm()`. First, we fit the model with the correct family and link function
 ```{r}
 fit <- train %$% 
   glm(Survived ~ Age + Pclass + Sex, 
       family = binomial(link = "logit"))
 ```
-Next, we gemerate the predicted values:
+Next, we generate the predicted values:
 ```{r}
 pred.glm <- ifelse(predict(fit, newdata = test, type = "response") > .5, "Yes", "No")
 ```

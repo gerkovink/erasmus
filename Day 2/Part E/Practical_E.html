@@ -373,7 +373,7 @@ data</code></pre>
 </ol>
 <pre class="r"><code>fit &lt;- 
   data %$%
-  glm(prop ~ conc, family=binomial, weights=margin)</code></pre>
+  glm(prop ~ conc, family=binomial(link = &quot;logit&quot;), weights=margin)</code></pre>
 <hr />
 <ol start="6" style="list-style-type: decimal">
 <li><strong>Look at the summary of the fitted object</strong></li>
@@ -381,7 +381,8 @@ data</code></pre>
 <pre class="r"><code>summary(fit)</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = prop ~ conc, family = binomial, weights = margin)
+## glm(formula = prop ~ conc, family = binomial(link = &quot;logit&quot;), 
+##     weights = margin)
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
@@ -584,9 +585,9 @@ confusionMatrix(pred, factor(obs$sex))</code></pre>
 <p>An quick way to perform crossvalidation is with <code>DAAG::CVbinary()</code>:</p>
 <pre class="r"><code>CVbinary(glm(sex ~ lpo, family=binomial(link=&#39;logit&#39;), data = brandsma.subset))</code></pre>
 <pre><code>## 
-## Fold:  6 8 9 7 3 2 1 4 5 10
+## Fold:  2 6 10 9 3 7 1 5 4 8
 ## Internal estimate of accuracy = 0.55
-## Cross-validation estimate of accuracy = 0.549</code></pre>
+## Cross-validation estimate of accuracy = 0.552</code></pre>
 <hr />
 <p>The lesson here is that a significant parameter has no meaning if the substantive interpretation of the effect is ignored. There is almost no relation, whatsoever, there is just sufficient data to deem the influence of <code>lpo</code> on <code>sex</code> worthy of significance.</p>
 <hr />

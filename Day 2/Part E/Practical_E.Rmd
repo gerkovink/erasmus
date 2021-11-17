@@ -124,7 +124,7 @@ We can now see that the $-\infty$ proportions are gone.
 ```{r}
 fit <- 
   data %$%
-  glm(prop ~ conc, family=binomial, weights=margin)
+  glm(prop ~ conc, family=binomial(link = "logit"), weights=margin)
 ```
 
 ---

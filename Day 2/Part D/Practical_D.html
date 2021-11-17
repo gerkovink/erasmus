@@ -435,13 +435,13 @@ pred &lt;- fit %&gt;%
 <p><strong>Exercise 4</strong> <strong>Now calculate the RMSE and the <span class="math inline">\(R^2\)</span> for the predictions and compare those to the fitted model in <code>fit</code></strong></p>
 <pre class="r"><code>results &lt;- data.frame(R2 = c(cor(pred, test$Age)^2, 
                              summary(fit)$r.squared),
-                      RMSE = c((pred - test$Age)^2 %&gt;% mean %&gt;% sqrt, 
+                      RMSE = c((pred - test$Age)^2 %&gt;% sum %&gt;% sqrt, 
                                fit$residuals^2 %&gt;% mean %&gt;% sqrt))
 rownames(results) &lt;- c(&quot;predicted&quot;, &quot;fitted&quot;)
 results</code></pre>
-<pre><code>##                  R2     RMSE
-## predicted 0.1802922 12.78799
-## fitted    0.2066340 12.57457</code></pre>
+<pre><code>##                  R2      RMSE
+## predicted 0.1802922 208.17344
+## fitted    0.2066340  12.57457</code></pre>
 <p>We see that the <span class="math inline">\(R^2\)</span> is lower for the predictions and that the root mean squared error is higher. For unbiased estimators we can view the RMSE as the standard error of the estimator. The MSE would then be the variance of that unbiased estimator.</p>
 <hr />
 <p><strong>Exercise 5</strong> <strong>Now use the <code>caret</code> package to do the same as above. Use the default paramters for the <code>train()</code> function and use the <code>train</code> data to train the model.</strong></p>
@@ -606,11 +606,12 @@ model</code></pre>
 ##        &#39;Positive&#39; Class : No              
 ## </code></pre>
 <hr />
-<p><strong>Exercise 9</strong> <strong>Compare the model obtained with <code>caret</code>’s <code>train()</code> on with a model obtained with <code>glm()</code>. Fit the <code>glm()</code> model on the training set. Study accuracy and parameters. </strong> We start with generating the relevant output from <code>glm()</code>. First, we fit the model with the correct family and link function</p>
+<p><strong>Exercise 9</strong> <strong>Compare the model obtained with <code>caret</code>’s <code>train()</code> on with a model obtained with <code>glm()</code>. Fit the <code>glm()</code> model on the training set. Study accuracy and parameters. </strong></p>
+<p>We start with generating the relevant output from <code>glm()</code>. First, we fit the model with the correct family and link function</p>
 <pre class="r"><code>fit &lt;- train %$% 
   glm(Survived ~ Age + Pclass + Sex, 
       family = binomial(link = &quot;logit&quot;))</code></pre>
-<p>Next, we gemerate the predicted values:</p>
+<p>Next, we generate the predicted values:</p>
 <pre class="r"><code>pred.glm &lt;- ifelse(predict(fit, newdata = test, type = &quot;response&quot;) &gt; .5, &quot;Yes&quot;, &quot;No&quot;)</code></pre>
 <p>We have to indicate how to go from the predicted probabilities back to <code>No</code> and <code>Yes</code>. I use the <code>ifelse()</code> function to do that: if the probability is over .5, then the new value will be <code>Yes</code>, else it will be <code>No</code>.</p>
 <p>Now we can enter this vector of predicted <code>Yes</code> and <code>No</code> in the <code>postResample()</code> function to compare it with the observations in <code>test$Survived</code>.</p>

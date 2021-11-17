@@ -1,0 +1,16 @@
+base
+MASS
+magrittr
+dplyr
+ggplot2
+Matrix
+glmnet
+VariableScreening
+lattice
+caret
+Formula
+plotrix
+TeachingDemos
+plotmo
+coefplot
+DT
