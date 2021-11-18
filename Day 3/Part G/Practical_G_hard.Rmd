@@ -1,0 +1,109 @@
+---
+title: "Exercises G"
+params:
+  answers: true
+author: "Gerko Vink"
+date: "Data Science and Predictive Machine Learning"
+output: html_document
+---
+
+---
+
+# Introduction
+
+---
+
+In this practical, we will focus on ridge regression.
+
+One of the packages we are going to use is `glmnet`. For this, you will probably need to `install.packages("glmnet")` before running the `library()` functions. `GGally` is also a new package, that needs to be installed to access the `ggpairs()` function.
+
+```{r packages, warning = FALSE, message = FALSE}
+library(MASS)
+library(magrittr)
+library(dplyr)
+library(GGally)
+library(glmnet)
+library(caret)
+```
+
+Before starting with the exercises, it is a good idea to set your seed, so that (1) your answers are reproducible and (2) you can compare your answers with the answers provided. 
+
+```{r seed}
+set.seed(123)
+```
+
+---
+
+#  Exercises
+
+---
+
+The `mtcars` data set from package `MASS` contains  fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)
+
+---
+
+1. __Make yourself familiar with the `mtcars` data set. Is everything properly coded?.__ 
+
+---
+
+2. __Recode the columns for which the measurement level is not properly set.__ 
+
+---
+
+3. __Visually inspect the data structure.__ 
+
+---
+
+4. __Fit a linear model with `hp` as the response and all other features as the predictors. Try to use the exposition (`%$%`) pipe.__ 
+
+---
+
+5. __Inspect the model's inference. How would you evaluate the model's performance?__ 
+
+---
+
+6. __Now fit a ridge regression model to the data. Name the resulting object `ridge`.__ 
+
+
+---
+
+7. __Inspect the `ridge` object and the `coef()` thereof.__ 
+
+---
+
+8. __Study the `summary()` of the ridge regression__ 
+
+---
+
+9. __Plot the ridge regression's fitted object `ridge` twice: once with the deviance on the x-axis and once with the log of lambda on the x-axis. Hint: see `?plot.glmnet`.__ 
+
+---
+
+10. __Now fit the ridge regression again, but in a cross-validation setting__ 
+
+---
+
+11. __Now fit the ridge regression again, but in a cross-validation setting. Name the resulting object `cv.ridge`.__ 
+
+
+---
+
+12. __Study the output of the `cv.ridge` object and run the object through `plot()`.__ 
+
+---
+
+13. __Compare the - ridge regression to the linear model. Study the RMSE and R-squared of the predicted values from both approaches. Which performs better?__ 
+
+---
+
+14. __Compare a 4-fold cross-validated ridge regression to the linear model again, but now train both models on a training set with 70% of cases. Use the remaining test cases to study the RMSE and R-squared of the predicted values (use both $\lambda_{min}$ and $\lambda_{1se}$ for ridge regression) from both approaches. Which method has better predictive power?__ 
+
+---
+
+**Important Note:** We have used both a test/train split and a k-fold cross-validation procedure. A different seed value will result in different splits and cross-validation folds. Don't forget that once you fix the seed, everything will become seed dependent. 
+
+---
+
+End of Practical
+
+

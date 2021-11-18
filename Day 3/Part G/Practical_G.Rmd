@@ -1,0 +1,367 @@
+---
+title: "Exercises G"
+params:
+  answers: true
+author: "Gerko Vink"
+date: "Data Science and Predictive Machine Learning"
+output: html_document
+---
+
+---
+
+# Introduction
+
+---
+
+In this practical, we will focus on ridge regression.
+
+One of the packages we are going to use is `glmnet`. For this, you will probably need to `install.packages("glmnet")` before running the `library()` functions. `GGally` is also a new package, that needs to be installed to access the `ggpairs()` function.
+
+```{r packages, warning = FALSE, message = FALSE}
+library(MASS)
+library(magrittr)
+library(dplyr)
+library(GGally)
+library(glmnet)
+library(caret)
+```
+
+Before starting with the exercises, it is a good idea to set your seed, so that (1) your answers are reproducible and (2) you can compare your answers with the answers provided. 
+
+```{r seed}
+set.seed(123)
+```
+
+---
+
+#  Exercises
+
+---
+
+The `mtcars` data set from package `MASS` contains  fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models)
+
+---
+
+1. __Make yourself familiar with the `mtcars` data set. Is everything properly coded?.__ 
+
+---
+
+Let's start with studying the dimensionality of the `mtcars` data
+```{r defaultplot1, include = params$answers}
+dim(mtcars)
+```
+There are not too many dimensions. The dataset holds `32` cases over `11` columns. This is tiny if we'd like to predict one column based on the others. 
+
+The reason why it is wise to start with the dimensionality of data is:
+
+1. if the data is highdimensional, generic data functions like `str()` and `summary` may be redundant as the output return would be too large to study. 
+2. highdimensional data may require different techniques. Now is this data not highdimensional, but there is definitely a curse of dimensionality.
+
+Now, let's look at the structure of the data:
+```{r}
+mtcars %>% str
+```
+The columns `vs` and `am` seem dichotomous. A call to `summary()` verifies this:
+```{r}
+mtcars %>% summary
+```
+The actual nature of these columns can also be retrieved from the help file. See e.g. `?mtcars`.
+
+---
+
+2. __Recode the columns for which the measurement level is not properly set.__ 
+
+---
+
+Let's recode the `vs` and `am` columns into factors. To avoid confusion later on, I'll name the recoded data set `mtc`.
+```{r}
+mtc <- mtcars %>% 
+  mutate(vs = factor(vs, labels = c("v-shaped", "straight")),
+         am = factor(am, labels = c("automatic", "manual")))
+```
+The measurement for these columns has now been properly set:
+```{r}
+mtc %>% str
+```
+
+---
+
+3. __Visually inspect the data structure.__ 
+
+I always like `GGally`'s function `ggpairs()` to inspect the multivariate structure. 
+```{r fig.height=10, fig.width = 10, message=FALSE, cache = TRUE}
+ggpairs(mtc)
+```
+It is clear that many features have quite substantial interrelations. The correlations between the first six columns are quite high. The boxplots for `am` and `vs` also demonstrate that there are quite some effects with the first variables. It is also apparant that for some variable combinations there are very few observations. 
+
+---
+
+4. __Fit a linear model with `hp` as the response and all other features as the predictors. Try to use the exposition (`%$%`) pipe.__ 
+
+---
+
+This is straightforward:
+```{r error = TRUE}
+fit <- mtc %$% 
+  lm(hp ~ ., data = .)
+```
+
+---
+
+5. __Inspect the model's inference. How would you evaluate the model's performance?__ 
+
+---
+
+```{r}
+fit %>% summary
+```
+
+The model seems to fit quite well to the data, as indicated by the high R-squared (and relatively similar Adjusted R-squared); yet, few of the predictors are significant. In short: the **observed** outcome seems to be quite well-represented with this model. 
+
+---
+
+6. __Now fit a ridge regression model to the data. Name the resulting object `ridge`.__ 
+
+---
+
+We use `glmnet` to fit the ridge regression. 
+```{r}
+y <- mtc$hp
+x <- model.matrix(fit)
+ridge <- glmnet(x = x, y = y, 
+                family = "gaussian",
+                alpha = 0, 
+                standardize = TRUE)
+```
+`glmnet` requires the data to be specified in terms of a response $y$ and a predictor space $\mathbf{X}$. The predictorspace $\mathbf{X}$ needs to be a design matrix - that means that all factors are coded as dummies, etc. The easiest way to obtain such a design matrix is with the `model.matrix()` function. Since I already created a fitted linear model, I might as well grab the design matrix from that object. The convenience here is that the `lm()` function already realized the factor expansion into dummies for us. 
+
+The remaining two function arguments in the `glmnet()` call are vital for the process of ridge estimation:
+
+- `alpha = 0` indicates that ridge regressions's $L_2$ regularization should be used.
+- `standardize = TRUE` is the default flag that indicates that the predictor space `x` should be standardized by `glmnet()` during estimation. A flag of `standardize = FALSE` would indicate that `glmnet()` does not perform standardization. 
+
+**Why is this standardization important?** Let's imagine that some features are measured in completely different units than other features. Then, the ones that would yield large OLS coefficients will be penalized more than estimates that yueld smaller OLS coefficients. In our example:
+
+```{r}
+fit %>% coef
+```
+
+the coefficients for `wt`, `vsstraight` and `carb` will be shrunk more than e.g. `disp`. This would not be fair, because engine displacement `disp` is measured in cubic inches (a high number) and `wt` is measured in 1000 lbs units. The unit scale between these variables is different and, hence, the coefficients are not comparable. Standardization would put all features in the same units ($\sim \mathcal{N}(0, 1)$) such that their relative importance with respect tot the response variable can be compared. 
+
+Naturally, the coefficients are backtransformed in the final model, such that they are in the scale of the original predictor values. 
+
+---
+
+7. __Inspect the `ridge` object and the `coef()` thereof.__ 
+
+---
+
+Let's start with the object `ridge`:
+```{r}
+ridge
+```
+
+The output shows three columns over 100 options for $\lambda$: 
+
+- **Df** shows the number of nonzero coefficients (equal to the model DF from Least Squares when $\lambda \ll \infty$).
+- **%Dev** the percent (of null) deviance explained 
+- **lambda** the value of $\lambda$ resulting in the corresponding `Df` and `%Dev`.
+
+Function `glmnet()` fits the model for 100 values of lambda by default. The function will stop when `%Dev` does not change sufficently from one `lambda` to the next 
+
+Let's look at the coefficients.
+```{r}
+ridge %>% coef()
+```
+We can see that the resulting output holds the coefficients of the 12 parameters (?) in the model for each of the 100 values of `lambda` that we saw already in the output of the `ridge` object. The extra parameter is the result of the model matrix that we entered as the predictor space `x`: it holds an intercept (i.e. a column of `1`'s) while the function `glmnet()` will by default add an intercept too. The redundant extra `Intercept` is set to zero.
+
+---
+
+8. __Study the `summary()` of the ridge regression__ 
+
+---
+
+There is no summary output. At least not as we know it. The reason is: the model is not fit to generate one specific scenario. For different values of the shrinkage/penalization parameter $\lambda$, different results are obtained. 
+
+---
+
+9. __Plot the ridge regression's fitted object `ridge` twice: once with the deviance on the x-axis and once with the log of lambda on the x-axis. Hint: see `?plot.glmnet`.__ 
+
+---
+
+Let's first plot the trace of the coefficients with the natural logarithm of `lambda`.
+```{r}
+plot(ridge, xvar = "lambda")
+```
+
+We can see that with increasing `lambda`, the parameters will shrink towards zero. Note that $\ln(\lambda) = 10$ would correspond to a `lambda` of `r exp(10)`. 
+```{r}
+plot(ridge, xvar = "dev")
+```
+
+We can see that with increasing `dev`, the parameters will move away frome zero.
+
+The lesson is that there is an optimal value for $\lambda$, where most
+
+---
+
+10. __Now fit the ridge regression again, but in a cross-validation setting__ 
+
+---
+
+```{r}
+ridge <- cv.glmnet(x = x[, -1], y = y, 
+                   family = "gaussian",
+                   alpha = 0, 
+                   standardize = TRUE)
+```
+
+I choose to remove the intercept by excluding the first column (`[, -1]`): `glmnet()` will by default add an intercept already and otherwise I'll have the redundant parameter that we saw before. 
+
+
+---
+
+11. __Now fit the ridge regression again, but in a cross-validation setting. Name the resulting object `cv.ridge`.__ 
+
+---
+
+```{r}
+cv.ridge <- cv.glmnet(x = x[, -1], y = y, 
+                   family = "gaussian",
+                   alpha = 0, 
+                   standardize = TRUE)
+```
+
+
+---
+
+12. __Study the output of the `cv.ridge` object and run the object through `plot()`.__ 
+
+---
+
+```{r}
+cv.ridge
+```
+There are two optimal parameters for $\lambda$ given, that both yield `9` nonzero coefficients:
+
+  - **lambda_min**: the $\lambda$ which minimizes out-of-sample loss in CV. That is, $\lambda_{min}$ yields the minimum mean cross-validated error.
+  - **lamda_1se**: the largest lambda value within 1 standard error of $\lambda_{min}$. One could argue that $\lambda_{1se}$ yields the most regularized model, such that the cross-validated error is within one standard error of the minimum.
+
+```{r}
+plot(cv.ridge)
+```
+  
+The vertical lines dashed lines show the locations of $\lambda_{min}$ and $\lambda_{1se}$.
+<br><br>
+**The 1-standard-error-rule** acknowledges the fact that the risk curves are estimated (and have error). It therefore favors parsimony. In other words: a simpler model that yields about the same predictive power as the one under $\lambda_{min}$. The motivation for $\lambda_{1se}$ originated in the [1984 book Classification and regression trees](https://books.google.nl/books/about/Classification_and_Regression_Trees.html?id=JwQx-WOmSyQC&redir_esc=y) by Breiman, Friedman, Olshen and Stone and can be found in chapter 3, paragraph 4.3.
+
+
+---
+
+13. __Compare the crossvalidated ridge regression to the linear model. Study the RMSE and R-squared of the predicted values from both approaches. Which performs better?__ 
+
+---
+
+First we obtain the linear model predictions (fitted values)
+```{r}
+pred.lm <- predict(fit)
+```
+and then we generate the predicted values for the ridge regression under the $\lambda_{1se}$ model:
+```{r}
+pred.ridge <- predict(cv.ridge, s = "lambda.1se", newx = x[, -1])
+```
+
+Using the `caret` function `postResample()` we obtain the following performance measures. 
+```{r}
+caret::postResample(pred.lm, y)
+caret::postResample(pred.ridge, y)
+```
+
+The linear model performs better than the ridge regression. However, we do not know how well these model fit on new predictions. Simply verifying the predicted values on the data the model has been trained on would be faulty: the linear model tends to fit better in that scenario as it yields unbiased parameter estimates. In conclusion; for inference purposes, the linear model may be fine. However, for prediction purposes it may overfit the data.
+
+---
+
+14. __Compare a 4-fold cross-validated ridge regression to the linear model again, but now train both models on a training set with 70% of cases. Use the remaining test cases to study the RMSE and R-squared of the predicted values (use both $\lambda_{min}$ and $\lambda_{1se}$ for ridge regression) from both approaches. Which method has better predictive power?__ 
+
+---
+
+I have chosen to fit 4 folds in this exercise because the sample size has decreased because of the train/test set. First, we create the train/test split.
+```{r}
+idx <- createDataPartition(mtc$hp, p = .7, list = FALSE)
+train <- mtc[idx, ]
+test <- mtc[-idx, ]
+```
+Then we refit the linear model to the training cases. We store the predicted values on the test data in object `pred`.
+```{r}
+fit <- train %$% lm(hp ~ ., data = .)
+pred <- predict(fit, newdata = test)
+```
+For ridge regression, we do the same. First we seperate the training response in vector `y` and we obtain the model matrix `x` from the fitted linear model (the one on the training data, naturally).
+```{r}
+y <- train$hp
+x <- model.matrix(fit)[, -1] #exclude intercept
+```
+Then we run the `cv.glmnet()` method to infer optimal values of lambda through cross-validation.
+```{r}
+ridge <- cv.glmnet(x = x, y = y, 
+                   family = "gaussian",
+                   alpha = 0, 
+                   standardize = TRUE, 
+                   nfolds = 4)
+```
+Finally we obtain the predicted values. To do so, I use a quick linear model on the test data to obtain the corresponding design matrix. I do this to avoid an annoying matrix property: if I would convert the test object to a matrix, every column would turn to character class. That is because matrices can be either numeric or character; not both. `predict.glmnet()` requires the input for argument `newx` to be a matrix.
+```{r}
+newx <- test %$% lm(hp ~ ., data = .) %>% model.matrix() %>% .[, -1]
+ridge_min <- predict(ridge, s = "lambda.min", newx = newx)
+ridge_1se <- predict(ridge, s = "lambda.1se", newx = newx)
+```
+
+Now, let's compare the three solutions:
+```{r}
+postResample(pred, test$hp)
+postResample(ridge_min, test$hp)
+postResample(ridge_1se, test$hp)
+```
+We can see that both ridge predictions outperform the linear model predictions, with the more regularized $\lambda_{1se}$ solution yielding the best predictive performance.
+
+---
+
+**Important Note:** We have used both a test/train split and a k-fold cross-validation procedure. A different seed value will result in different splits and cross-validation folds. Don't forget that once you fix the seed, everything will become seed dependent. 
+
+Re-running it all again yields:
+```{r echo = FALSE}
+idx <- createDataPartition(mtc$hp, p = .7, list = FALSE)
+train <- mtc[idx, ]
+test <- mtc[-idx, ]
+
+fit <- train %$% lm(hp ~ ., data = .)
+pred <- predict(fit, newdata = test)
+
+y <- train$hp
+x <- model.matrix(fit)[, -1] #exclude intercept
+
+ridge <- cv.glmnet(x = x, y = y, 
+                   family = "gaussian",
+                   alpha = 0, 
+                   standardize = TRUE, 
+                   nfolds = 4)
+
+newx <- test %$% lm(hp ~ ., data = .) %>% model.matrix() %>% .[, -1]
+ridge_min <- predict(ridge, s = "lambda.min", newx = newx)
+ridge_1se <- predict(ridge, s = "lambda.1se", newx = newx)
+
+postResample(pred, test$hp)
+postResample(ridge_min, test$hp)
+postResample(ridge_1se, test$hp)
+```
+
+
+```{r echo = FALSE}
+save.image("../Part H/load_all_objects.RData")
+```
+
+---
+
+End of Practical
+
+

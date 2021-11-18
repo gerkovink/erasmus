@@ -200,3 +200,36 @@ Hieronder links naar antwoorden op gestelde vragen:
 - Waarom likelihood-based methoden een dispersie paramater van 1 vereisen, staat uitgelegd in [dit hoofdstuk](https://www.sagepub.com/sites/default/files/upm-binaries/21121_Chapter_15.pdf)
 - De techniek achter `rlm`'s M-estimation - en nog veel meer - [wordt hier besproken](http://www.stats.ox.ac.uk/~ripley/StatMethods/Robust.pdf). De schrijver - [Brian Ripley](https://en.wikipedia.org/wiki/Brian_D._Ripley) - is de auteur van veel `R` functionaliteit en een voorvechter van robust statistics. 
 
+# Dag 3
+
+## Column 1
+
+### Materials
+Mijn voorstel is om deze dag iets anders in te delen met 's ochtends een technische sessie gericht op ridge regressie en 's middags een meer praktische sessie gericht op Lasso regressie en het Elastic Net. 
+
+- Part G: Ridge regression
+    - [Lecture G](Day 3/Part G/Lecture_G.html)
+    - [Practical G](Day 3/Part G/Practical_G.html)
+    - [Impractical G (zonder antwoorden)](Day 3/Part G/Practical_G_hard.html)
+- Part F: Lasso en het Elastic Net
+    - [Lecture H](Day 3/Part H/Lecture_H.html)
+    - [Practical H](Day 3/Part H/Practical_HH.html)
+    - [Impractical F (zonder antwoorden)](Day 3/Part H/Practical_HH_hard.html)
+
+Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen. **Ik heb ook Impracticals gemaakt; dit zijn alleen de opdrachten, zonder de antwoorden.**
+
+Wil je de technieken liever toepassen op je eigen data, dan is daar ook alle mogelijkheid toe. 
+
+
+## Column 2
+
+### Useful references
+
+- [Het `caret` boek](https://topepo.github.io/caret/index.html)
+- [De `glmnet` reference page](https://glmnet.stanford.edu/index.html)
+
+De bovenstaande referentie vormen een mooie praktische toevoeging op de materialen van vandaag. 
+
+
+### Questions answered
+Vooralsnog leeg. 

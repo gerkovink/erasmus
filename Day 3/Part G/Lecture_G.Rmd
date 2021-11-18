@@ -21,6 +21,19 @@ library(glmnet)   # penalized regression
 library(plotmo)   # informative plots
 ```
 
+
+## This session
+
+Goal: learning to apply ridge regression
+
+To reach the goal we need to
+
+1. Refresh our memory
+2. Understand how regression works
+3. Understand the shortcomings of OLS
+4. PLug in the ridge penalty
+5. Apply it in software
+
 ## So far
 
 At this point we have covered the following models for outcome $Y$ and predictor matrix $X$

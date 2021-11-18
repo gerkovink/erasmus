@@ -1,0 +1,58 @@
+---
+title: "Exercises G"
+params:
+  answers: true
+author: "Gerko Vink"
+date: "Data Science and Predictive Machine Learning"
+output: html_document
+---
+
+# Introduction
+
+---
+
+In this practical, we will focus on two different classification methods: K-nearest neighbours and logistic regression.
+
+One of the packages we are going to use is `class`. For this, you will probably need to `install.packages("class")` before running the `library()` functions. `ISLR` is also a new package, that needs to be installed to access the `Default` data.
+
+```{r packages, warning = FALSE, message = FALSE}
+library(MASS)
+library(magrittr)
+library(class)
+library(ISLR)
+library(tidyverse)
+library(caret)
+```
+
+Before starting with the exercises, it is a good idea to set your seed, so that (1) your answers are reproducible and (2) you can compare your answers with the answers provided. 
+
+```{r seed}
+set.seed(123)
+```
+
+---
+
+# Default dataset from package `ISLR`
+
+---
+
+The default dataset contains credit card loan data for 10 000 people. The goal is to classify credit card cases as `yes` or `no` based on whether they will default on their loan.
+
+---
+
+1. __Create a scatterplot of the `Default` dataset, where `balance` is mapped to the x position, `income` is mapped to the y position, and `default` is mapped to the colour. Can you see any interesting patterns already?__ 
+
+---
+
+```{r defaultplot1, include = params$answers}
+
+```
+
+https://www.r-bloggers.com/2021/05/lasso-regression-model-with-r-code/
+
+
+---
+
+End of Practical
+
+
