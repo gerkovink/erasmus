@@ -324,6 +324,10 @@ postResample(ridge_1se, test$hp)
 ```
 We can see that both ridge predictions outperform the linear model predictions, with the more regularized $\lambda_{1se}$ solution yielding the best predictive performance.
 
+```{r echo = FALSE}
+save.image("../Part H/load_all_objects.RData")
+```
+
 ---
 
 **Important Note:** We have used both a test/train split and a k-fold cross-validation procedure. A different seed value will result in different splits and cross-validation folds. Don't forget that once you fix the seed, everything will become seed dependent. 
@@ -356,9 +360,7 @@ postResample(ridge_1se, test$hp)
 ```
 
 
-```{r echo = FALSE}
-save.image("../Part H/load_all_objects.RData")
-```
+
 
 ---
 

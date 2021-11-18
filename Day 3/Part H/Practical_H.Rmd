@@ -1,7 +1,5 @@
 ---
-title: "Exercises G"
-params:
-  answers: true
+title: "Exercises H"
 author: "Gerko Vink"
 date: "Data Science and Predictive Machine Learning"
 output: html_document
@@ -11,20 +9,39 @@ output: html_document
 
 ---
 
-In this practical, we will focus on two different classification methods: K-nearest neighbours and logistic regression.
-
-One of the packages we are going to use is `class`. For this, you will probably need to `install.packages("class")` before running the `library()` functions. `ISLR` is also a new package, that needs to be installed to access the `Default` data.
-
+In this practical, we will continue with regularized regression. We need the following packages:
 ```{r packages, warning = FALSE, message = FALSE}
-library(MASS)
 library(magrittr)
-library(class)
-library(ISLR)
-library(tidyverse)
+library(dplyr)
+library(GGally)
+library(glmnet)
 library(caret)
+library(plotmo)
+library(coefplot)
 ```
 
-Before starting with the exercises, it is a good idea to set your seed, so that (1) your answers are reproducible and (2) you can compare your answers with the answers provided. 
+---
+
+We continue with the previous practical. For convenience, I have prepared an image with all necessary objects and functions from the previous practical so that we continue where we left off. 
+
+To load that workspace image, run the below code block.
+```{r}
+con <- url("https://www.gerkovink.com/erasmus/Day%203/Part%20H/load_all_objects.RData")
+load(con)
+```
+
+
+The comparison in the previous practical was between OLS and Ridge regression for the `mtc` data. The `mtc` data set is our recoded version of the `mtcars` data, where the binary columns are set to factors. We created a training set (`train`) and a test set (`test`) based on this `mtc` data. If you recall, OLS performed worse than ridge regression
+
+```{r}
+postResample(pred, test$hp) # lm()
+postResample(ridge_min, test$hp) # ridge with \lambda_min
+postResample(ridge_1se, test$hp) # ridge with \lambda_1se
+```
+
+---
+
+Before starting with the exercises, it is a good idea to set your RNG seed, so that (1) your answers are reproducible and (2) you can compare your answers with the answers provided. 
 
 ```{r seed}
 set.seed(123)
@@ -32,24 +49,134 @@ set.seed(123)
 
 ---
 
-# Default dataset from package `ISLR`
+1. __Fit a lasso on the training data. Name the object `fit.lasso`. Do not do crossvalidation, yet.__
 
 ---
 
-The default dataset contains credit card loan data for 10 000 people. The goal is to classify credit card cases as `yes` or `no` based on whether they will default on their loan.
-
----
-
-1. __Create a scatterplot of the `Default` dataset, where `balance` is mapped to the x position, `income` is mapped to the y position, and `default` is mapped to the colour. Can you see any interesting patterns already?__ 
-
----
-
-```{r defaultplot1, include = params$answers}
-
+```{r}
+fit.lasso <- glmnet(x = x, y = y, 
+                    family = "gaussian", 
+                    alpha = 1)
 ```
+
+There is no need to set the argument `standardize = TRUE` to ensure that the predictors are *measured* in the same units, because it is by default set as `TRUE`. 
+
+---
+
+2. __Inspect the plots on the fitted object. Use different x-axes.__
+
+---
+
+The first, generic plot on the `fit.lasso` object yields the plot of the coefficients against the $L_1$ norm. 
+```{r}
+plot(fit.lasso)
+```
+
+We can see that the harder the penalization, the more the coefficients are shrunk towards zero and the fewer non-zero coefficients remain. When the manhattan norm would result in zero, all coefficients are set to zero. The lasso clearly bets on sparsity. 
+
+Let's look at the same plot, but now with $\text{Log}(\lambda)$ on the x-axis.
+```{r}
+plot(fit.lasso, xvar = "lambda")
+```
+
+It is clear that with increasing $\lambda$ comes increasing shrinkage and selection. 
+
+The final plot demonstrates the same trend, but now with the deviance on the x-axis. 
+```{r}
+plot(fit.lasso, xvar = "dev")
+```
+
+---
+
+The function `plot_glmnet()` from package `plotmo` has a nicer - but very similar - plot class. I often prefer these plots over the native `plot.glmnet()`
+
+---
+
+3. __Recreate the plots from (2) with `plot_glmnet()`.__
+
+---
+
+The arguments are slightly different for 
+```{r}
+plot_glmnet(fit.lasso, xvar = "norm")
+plot_glmnet(fit.lasso, xvar = "lambda")
+plot_glmnet(fit.lasso, xvar = "dev")
+```
+
+And there is one extra plot in `plot_glmnet()` that reverses the $\text{Log}(\lambda)$ x-axis and gives the corresponding $\lambda$ values at the top margin. This is the plot that is returned by default by `plot_glmnet()` when the argument `xvar` is not specified. 
+
+```{r}
+plot_glmnet(fit.lasso)
+```
+
+---
+
+4. __Train a lasso regression model on the `train` data set. Name the resulting object `lasso`. Use 4-fold crossvalidation, just like with ridge regression.__ 
+
+---
+
+To fit the lasso model, we need to specify `alpha = 1` in function `glmnet()`
+```{r}
+lasso <- cv.glmnet(x = x, y = y, 
+                   family = "gaussian",
+                   alpha = 1, 
+                   standardize = TRUE, 
+                   nfolds = 4)
+```
+
+
+---
+
+5. __Find out which value of $\lambda$ yields the lowest cross-validated error. Do a visual and a numeric inspection.__
+
+---
+
+
+Let's first look at the plot.
+```{r}
+plot(lasso)
+```
+
+It is clear that different values for $\text{Log}(\lambda)$ yield different Mean-squared Error (MSE). The optimum, that is the value of $\text{Log}(\lambda)$ for which the MSE is minimal lies at $\text{Log}(\lambda_{min}) =$ `r log(lasso$lambda.min)`. The more parsimonious optimum that lies within 1 standard error can be found at $\text{Log}(\lambda_{1se}) =$ `r log(lasso$lambda.1se)`.
+
+The `lasso` object also returns the optimal values for $\lambda$
+```{r}
+lasso
+```
+Please note that these values are the $\lambda$ values and not the $\text{Log}(\lambda)$'s from the plot. 
+
+---
+
+6. __Add the performance of the lasso regression to the comparison made earlier. Does the lasso perform better than ridge regression?__
+
+---
+
+Let's take the more parsimonious $\lambda_{1se}$ as the $\lambda$-parameter for the Lasso regression. 
+```{r}
+lasso_1se <- predict(lasso, s = "lambda.1se", newx = newx)
+```
+If we then compare the predicted values to the observations in the `test` object, we obtain the following performance measures. 
+
+```{r}
+postResample(pred, test$hp) # lm
+postResample(ridge_1se, test$hp) # ridge
+postResample(lasso_1se, test$hp) # lasso
+```
+
+
+
 
 https://www.r-bloggers.com/2021/05/lasso-regression-model-with-r-code/
 
+https://drsimonj.svbtle.com/ridge-regression-with-glmnet #
+
+https://www.datacamp.com/community/tutorials/tutorial-ridge-lasso-elastic-net #Mtcars
+
+https://jbhender.github.io/Stats506/F17/Projects/G13/R.html #hipcenter
+
+http://www.sthda.com/english/articles/36-classification-methods-essentials/149-penalized-logistic-regression-essentials-in-r-ridge-lasso-and-elastic-net/ #Pima
+
+https://daviddalpiaz.github.io/r4sl/regularization.html #Hitters
 
 ---
 
