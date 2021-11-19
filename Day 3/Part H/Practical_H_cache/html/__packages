@@ -1,0 +1,14 @@
+base
+magrittr
+dplyr
+ggplot2
+GGally
+Matrix
+glmnet
+lattice
+caret
+Formula
+plotrix
+TeachingDemos
+plotmo
+coefplot

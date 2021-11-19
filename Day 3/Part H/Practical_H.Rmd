@@ -162,21 +162,259 @@ postResample(pred, test$hp) # lm
 postResample(ridge_1se, test$hp) # ridge
 postResample(lasso_1se, test$hp) # lasso
 ```
+The lasso performs slightly better than ridge regression in this case. We must alsonote that the lasso does have fewer parameters to obtain nearly the same predictive performance:
+```{r}
+lasso %>% coef(s = "lambda.1se")
+```
+The lasso only uses 5 parameters, including the intercept. The ridge regression uses all 11 parameters. The lasso regression solution is therefor far more parsimonious. 
+```{r}
+ridge %>% coef(s = "lambda.1se")
+```
+
+---
+
+7. __Rerun the crossvalidated ridge regression again, but now only with the paramaters selected by the lasso regression. Does performance increase?__
+
+---
+
+Let's rerun the ridge regression, but first we need to adjust the model matrix.
+```{r}
+x.subset <- model.matrix(hp ~ -1 + cyl + disp + qsec + carb, data = train) 
+```
+The `-1` in the formula excludes the `Intercept`. We don't need the intercept in the design matrix because `glmnet()` will add it automatically. 
+
+Let's fit the ridge model again
+```{r}
+ridge.subset <- cv.glmnet(x = x.subset, y = y, 
+                          family = "gaussian",
+                          alpha = 0, 
+                          nfolds = 4)
+plot(ridge.subset)
+```
+
+Now, let's obtain the predicted values for the `ridge.subset` model. 
+```{r}
+newx.subset <- model.matrix(hp ~ -1 + cyl + disp + qsec + carb, data = test) 
+ridge.subset_1se <- predict(ridge.subset, s = "lambda.1se", newx = newx.subset)
+```
+If we calculate the performance measures for the `ridge.subset` model
+```{r}
+postResample(ridge.subset_1se, test$hp) 
+```
+we see that performance has indeed increased by making use of both $L_1$ and $L_2$ regularization. 
+
+---
+
+# The elastic net
+
+---
+
+Instead of fitting thes
+
+---
+
+8. __Fit an elastic net on the `train` data (not the subset) and set `alpha = 0.5`. Does performance on the `test` data increase?__
+
+---
+
+Let's run the elastic net regression
+```{r}
+e.net <- cv.glmnet(x = x, y = y, 
+                   family = "gaussian",
+                   alpha = 0.5, 
+                   nfolds = 4)
+plot(e.net)
+```
+The elastic net yields a slightly higher mean squared error than the previous `ridge.subset` solution. 
+
+```{r}
+e.net
+ridge.subset
+```
+Let's generate predicted values from the elastic net model
+```{r}
+e.net_1se <- predict(e.net, s = "lambda.1se", newx = newx)
+```
+If we calculate the performance measures for the `e.net` model
+```{r}
+postResample(e.net_1se, test$hp) 
+```
+we see that performance has slightly increased over our *hacky* $L_1$ and $L_2$ regularization. 
+
+---
+
+**Different levels of `alpha`** will yield different performance. So, just like $\lambda$, $\alpha$ is a hyperparameter that can be optimized. 
 
 
+---
+
+9. __Train an elastic net model using `caret`. Can you find a combination of `alpha` (between 0.1 and 1 in steps of .1) and `lambda` (between 0.1 and 30 in steps of 1) that yields a better predictive performance than the one currently obtained?__
+
+---
+
+To do so, we need to define a tuning grid for the parameters `alpha` and `lambda`. 
+```{r}
+grid <- expand.grid(alpha = seq(0.1, 1, by = .1),
+                    lambda = seq(0.1, 30, by = .1))
+grid %>% head(n=20)
+```
+The above tuning grid takes values for `alpha` (between 0.1 and 1) and `lambda` (between 0.1 and 30). The total number of combinations between `alpha`'s and `lambda`'s is $10 \times 30 = 300$.
+
+Now let's fit the model (it may take a while!)
+```{r}
+model <- train(x, y, 
+               method = "glmnet",
+               tuneGrid = grid,
+               trControl = trainControl(method = "cv", number = 4))
+```
+The model has to navigate over the combinations specified in the tuning grid `grid`.
+
+Let's inspect the model
+```{r fig.height=10, fig.width = 10}
+plot(model)
+```
+
+The solution for the lambda's is different from `glmnet`'s solution. This is because the cross-validated sampling is different. The `training` data is quite small, therefore the splitting can influence the hyperparameter optimization.
+
+The *best* parameters that are obtained for `alpha` and `lambda` are
+```{r}
+model$bestTune
+```
+Generating predicted values for the trained model:
+```{r}
+e.net.caret <- predict(model, newdata = newx)
+```
+The performance of the trained model is 
+```{r}
+postResample(e.net.caret, test$hp) 
+```
+which is far worse than the performance of the `glmnet` elastic net with `alpha = 0.5`. 
+
+---
+
+10. __Use the `alpha` and `lambda` obtained in the previous exercise to generate predictions with `glmnet`. Is the performance the same?__
+
+---
+
+```{r}
+glmnet(x, y, 
+       alpha = model$bestTune$alpha, 
+       lambda = model$bestTune$lambda) %>% 
+  predict(newx = newx) %>% 
+  postResample(test$hp) 
+```
+
+The results are the same.
+
+---
+
+11. __Apply lasso regression to the prediction of `am` (automatic or manual cars) based on the following design matrix. Use the same train/test split__
+
+```{r eval = FALSE}
+x <- model.matrix(am ~ -1 + mpg + disp + hp + drat + wt + qsec, data = train)
+```
+
+---
+
+Let's first generate the data parts to feed to `glmnet`.
+```{r}
+y <- train$am
+x <- model.matrix(am ~ -1 + mpg + disp + hp + drat + wt + qsec, data = train)
+```
+Run the model
+```{r}
+fit <- cv.glmnet(x, y, family = "binomial", alpha = 1, nfolds = 4)
+```
+A lot of warnings are printed. There are few observations and the crossvalidation may bring us in dangerous territories. What if a fold contains only one class for the response?
+
+---
+
+12. __Inspect the lambda trace with `plot()`. What are the optimum values for `lambda`?__
+
+---
+
+Let's inspect the model, despite the warnings earlier
+```{r}
+plot(fit)
+```
+The deviance stays realtively constant at the beginning, but increases steeply when $\lambda$ becomes larger.
+
+The optimal values for $\lambda$ are 
+```{r}
+fit
+```
+
+---
+
+13. __Can you reasonably predict the values of `am` with this model?__
+
+```{r}
+newx <- model.matrix(am ~ -1 + mpg + disp + hp + drat + wt + qsec, data = test)
+pred <- fit %>% 
+  predict(newx = newx, type = "class")
+postResample(pred, test$am)
+```
+
+Yes; only one mistake. Not bad!
+
+---
+
+14. __Inspect the confusion matrix? Is the performance still good?__
+
+```{r}
+newx <- model.matrix(am ~ -1 + mpg + disp + hp + drat + wt + qsec, data = test)
+pred <- fit %>% 
+  predict(newx = newx, type = "class")
+confusionMatrix(factor(pred), test$am)
+```
+
+Performance is much better than the baseline performance.
+
+---
 
 
-https://www.r-bloggers.com/2021/05/lasso-regression-model-with-r-code/
+15. __How would a logistic model have performed?__
 
-https://drsimonj.svbtle.com/ridge-regression-with-glmnet #
+```{r}
+pred <- glm(am ~ mpg + disp + hp + drat + wt + qsec, data = train,
+            family = binomial(link = "logit")) %>% 
+  predict(newdata = test, 
+          type = "response")
 
-https://www.datacamp.com/community/tutorials/tutorial-ridge-lasso-elastic-net #Mtcars
+confusionMatrix(factor(ifelse(pred > .5, "manual", "automatic")),
+                test$am)
+```
 
-https://jbhender.github.io/Stats506/F17/Projects/G13/R.html #hipcenter
+A logistic model in this case performed the same, but with a lot of algorithmic problems. It's a good thing that the developers for `glm()` know what they are doing!
 
-http://www.sthda.com/english/articles/36-classification-methods-essentials/149-penalized-logistic-regression-essentials-in-r-ridge-lasso-and-elastic-net/ #Pima
 
-https://daviddalpiaz.github.io/r4sl/regularization.html #Hitters
+---
+
+# Final challenge for today
+
+---
+
+# Gene expression data
+
+The data file we will be working with is gene expression data. Using microarrays, the expression of many genes can be measured at the same time. The data file contains expressions for 54675 genes with IDs such as `1007_s_at`, `202896_s_at`, `AFFX-r2-P1-cre-3_at`. (NB: these IDs are specific for this type of chip and need to be converted to actual gene names before they can be looked up in a database such as "GeneCards"). The values in the data file are related to the amount of RNA belonging to each gene found in the tissue sample.
+
+
+The goal of the study for which this data was collected is one of exploratory cancer classification: are there differences in gene expression between tissue samples of human prostates with and without prostate cancer?
+
+**CHALLENGE: Use the `challenge.zip` archive on the course website to predict `Disease` from a huge set of genotypes as accurately as possible using either ridge regression, lasso regression or a combination thereof (elastic net or hacky way).**
+
+Rules: 
+
+- Code must be submitted to me at G.Vink@uu.nl - use the `challenge.Rmd` file online
+- use `glmnet` or `caret`
+- Fix your seed
+- Use a 80/20 train/test split
+- Train your model on the training set
+- Performance is calculated on the test set
+- Lowest RMSE wins!
+- Deadline is today at 5pm
+
+The best performing model will be awarded a prize next week (or per mail) 
 
 ---
 

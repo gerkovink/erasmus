@@ -1,0 +1,22 @@
+---
+title: "Challenge"
+author: "Gerko Vink"
+date: "Data Science & Predictive Machine Learning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Your Name
+# Your final RMSE
+```
+
+# Load the data
+```{r cars}
+load("challenge_data.RData")
+```
+
+# Your solution

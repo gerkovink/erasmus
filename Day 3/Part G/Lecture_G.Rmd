@@ -57,7 +57,27 @@ $$Y = \mathbb{E}[Y] + \varepsilon,\quad \text{where}\quad  \mathbb{E}[Y] = \alph
 - discuss what happens when $X$ does not behave
 
 ## Least squares
-slide with minimized LS
+```{r fig.height=3.7, warning=FALSE, echo=FALSE, message=FALSE, fig.align='center'}
+set.seed(123)
+plotdata2 <- data.frame(X = rnorm(100, 167.5, 10)) %>%
+  mutate(Y = rnorm(100, 0, 10) - X + 335)
+
+fit <- plotdata2 %$%
+  lm(Y~X)
+
+ plotdata2 %>%
+   mutate(predicted = predict(fit),
+          residuals = residuals(fit)) %>%
+  ggplot(aes(X, Y)) +
+  geom_smooth(method = "lm", se = FALSE, color = "orange") +
+  geom_segment(aes(xend = X, yend = predicted), color = "orange", alpha = .5) +
+  geom_point(aes(color = abs(residuals))) + 
+  scale_color_continuous(low = "blue", high = "red") +  
+  guides(color = FALSE) +  
+  geom_point(aes(y = predicted), shape = 1, color = "orange") +
+  ggtitle("Multivariate (X, Y), higher correlation") +
+  theme_minimal()
+```
 
 So far we have been focusing on minimizing the squared deviations. This is equivalent to maximizing the likelihood. 
 
@@ -80,13 +100,23 @@ $$X = (X_{*, 1} | \dots|X_{*, p}) =
     X_{n, 1} & \dots & X_{n, p}
   \end{bmatrix}.$$
 
-This matrix is called the *design matrix*. This is not the only information that we have. We also have another source of information about the cases and features in $X$: the *response variable* $Y$.
+This matrix is called the *design matrix*. 
+```{r echo=FALSE}
+set.seed(123)
+model.matrix(age ~ hgt + wgt + bmi + hc + reg, data = mice::boys)[sample(1:748, 6), ]
+```
+This is not the only information that we have. We also have another source of information about the cases and features in $X$: the *response variable* $Y$.
 
+## Aim
 The aim is now to explain $Y$ in **terms** of $X$ through the functional relationship
 
 $$Y_i = f(\mathbf{X}_{i, *}), \quad \text{where} \quad i = 1, \dots, n.$$
 
-When we know nothing about the nature of the form of $f(.)$, a reasonable assumption would be to assume that the nature is linear:
+When we know nothing about the nature of the form of $f(.)$, a reasonable assumption would be to assume that the nature is linear.
+
+*Why is that reasonable?*
+
+When the nature is linear:
 
 <center>
 **When $X$ changes, $Y$ also changes with a constant coefficient**
@@ -95,9 +125,9 @@ When we know nothing about the nature of the form of $f(.)$, a reasonable assump
 ## The linear model
 When $X$ and $Y$ are assumed to be linearly related, then
 
-$$Y_i = \mathbf{X}_{i, *}\boldsymbol{\beta}+\epsilon_i = \beta_1X_{i,1} + \dots + \beta_1X_{i,p} + \varepsilon_i.$$
+$$Y_i = \mathbf{X}_{i, *}\boldsymbol{\beta}+\epsilon_i = \beta_1X_{i,1} + \dots + \beta_pX_{i,p} + \varepsilon_i.$$
 
-In the above additive model, the vector $\boldsymbol{\beta} = (\beta_1, \dots, \beta_p)^\prime$ represents the *regression parameter* when regressing $X$ on $Y$.
+In the above additive model, the vector $\boldsymbol{\beta} = (\beta_1, \dots, \beta_p)^\prime$ represents the *regression parameter* when regressing $\mathbf{X}$ on $Y$.
 <br><br>
 The nice thing is that each $\beta_j, j = 1, \dots, p$ denotes the effect size of the $j$th column in $\mathbf{X}$ on the response $Y$. 
 
@@ -110,10 +140,10 @@ The term $\varepsilon_i$ represent the part of the response $Y$ that is not expl
   - all $\varepsilon$ are independent (i.e. $\text{Cov}(\varepsilon_i, \varepsilon_{i^\prime}) = 0$ when $i \neq i^\prime$) 
 
 ## Importance of $\varepsilon$
-The randomn nature of $\varepsilon_i$ has a strict implication: because $\varepsilon_i$ is random, $Y_i$ is also a random variable. 
+The random nature of $\varepsilon_i$ has a strict implication: because $\varepsilon_i$ is random, $Y_i$ is also a random variable. 
 
 - $Y_i$ is normally distributed because $\varepsilon_i \sim \mathcal{N}(0, \sigma_\varepsilon^2)$ and $\mathbf{X}_{i,*}\mathbf{\beta}$ is a non-random scalar.
-- in practice $\mathbf{Y}_i$ may not be exactly normally distributed - but the above does imply normality for $Y_i$
+- in practice $\mathbf{Y}_i$ may not be exactly normally distributed -> but the above does imply normality for $Y_i$
 - without $\varepsilon_i$ all observed $\mathbf{Y}_i$ would need to be exactly on the regression line. 
 - without $\varepsilon_i$, our model needs to be perfect
 
@@ -146,7 +176,7 @@ $$f_{Y_i}(y_i) = (2\pi\sigma_\varepsilon^2)^{-1/2}\text{exp}[-(y_i -\mathbf{X}_{
 
 So far we have expressed everything in terms of the least-squares (i.e. minimizing $\sigma_\varepsilon^2$), but we can also express the linear model in terms of maximizing the likelihood. The likelihood is:
 
-$$L(\mathbf{Y},\mathbf{X};\mathbf{\beta},\sigma_\varepsilon^2) =  \prod_{i=1}^{n} (\sqrt{2\pi\sigma_\varepsilon})^{-1}\text{exp}[\mathbf{Y}_i -\mathbf{X}_{i,*}\mathbf{\beta})^2 / 2\sigma_\varepsilon^2].$$
+$$L(\mathbf{Y},\mathbf{X};\mathbf{\beta},\sigma_\varepsilon^2) =  \prod_{i=1}^{n} (\sigma_\varepsilon\sqrt{2\pi})^{-1}\text{exp}[\mathbf{Y}_i -\mathbf{X}_{i,*}\mathbf{\beta})^2 / 2\sigma_\varepsilon^2].$$
 
 ## The log-likelihood
 

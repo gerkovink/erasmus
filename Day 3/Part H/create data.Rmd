@@ -1,0 +1,78 @@
+---
+title: "Dealing with high-dimensional data"
+params:
+   answers: true
+mainfont: Arial
+fontsize: 12pt
+urlcolor: blue
+output: 
+  html_document:
+    toc: true
+    toc_depth: 1
+    toc_float: true
+    df_print: paged
+    theme: paper
+    highlight: pygments
+  # md_document:
+  #   variant: gfm
+  #   toc: true
+  #   toc_depth: 1
+  #   number_sections: true
+  #   df_print: paged
+# NB: knit to md for display on website without answers, 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+In this practical, we will deal with the curse of dimensionality by applying the "bet on sparsity". We will use the following packages in the process:
+
+```{r package, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(glmnet)
+```
+
+Create a practical folder with an .Rproj file (e.g., `practical_01.Rproj`) and a data folder inside. Download the prepared files below and put them in the data folder in your project directory.
+
+- [gene_expressions.rds](data/gene_expressions.rds)
+- [phenotypes.rds](data/phenotypes.rds) 
+
+# Gene expression data
+
+The data file we will be working with is gene expression data. Using microarrays, the expression of many genes can be measured at the same time. The data file contains expressions for 54675 genes with IDs such as `1007_s_at`, `202896_s_at`, `AFFX-r2-P1-cre-3_at`. (NB: these IDs are specific for this type of chip and need to be converted to actual gene names before they can be looked up in a database such as "GeneCards"). The values in the data file are related to the amount of RNA belonging to each gene found in the tissue sample.
+
+
+The goal of the study for which this data was collected is one of exploratory cancer classification: are there differences in gene expression between tissue samples of human prostates with and without prostate cancer?
+
+__1. Read the data file `gene_expressions.rds` using `read_rds()`. What are the dimensions of the data? What is the sample size?__
+
+```{r read_data, include=params$answers, eval=params$answers, message=FALSE, warning=FALSE}
+# read the data to a tibble
+expr_dat <- read_rds("data/gene_expressions.rds")
+
+# inspect the dimensions
+dim(expr_dat)
+# The file has 54675 columns and 237 rows
+
+# the sample size is 237
+```
+
+__3. We now only have the gene expression data, but the labels are in the file `phenotypes.rds`. Load that file, `select()` the relevant columns for classification into `normal` and `tumor` tissue, and `join()` it with the gene expression data, based on the tissue identifier in the `sample` column. Give the resulting dataset a good name!__
+
+```{r join, include=params$answers, eval=params$answers}
+phen <- read_rds("data/phenotypes.rds")
+cancer_df <- 
+  phen %>% 
+  mutate(disease = as_factor(disease)) %>% # it's always a good idea to ensure the correct measurement level!
+  select(sample, disease) %>% 
+  right_join(expr_dat)
+dim(cancer_df)
+```
+
+```{r}
+save(cancer_df, file = "challenge_data.RData")
+```
+

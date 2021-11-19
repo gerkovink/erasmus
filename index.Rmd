@@ -213,8 +213,9 @@ Mijn voorstel is om deze dag iets anders in te delen met 's ochtends een technis
     - [Impractical G (zonder antwoorden)](Day 3/Part G/Practical_G_hard.html)
 - Part F: Lasso en het Elastic Net
     - [Lecture H](Day 3/Part H/Lecture_H.html)
-    - [Practical H](Day 3/Part H/Practical_HH.html)
-    - [Impractical F (zonder antwoorden)](Day 3/Part H/Practical_HH_hard.html)
+    - [Practical H](Day 3/Part H/Practical_H.html)
+    - [Impractical H (zonder antwoorden)](Day 3/Part H/Practical_H_hard.html)
+    - [challenge.zip](Day 3/Part H/challenge.zip)
 
 Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen. **Ik heb ook Impracticals gemaakt; dit zijn alleen de opdrachten, zonder de antwoorden.**
 
