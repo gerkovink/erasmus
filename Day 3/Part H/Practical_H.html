@@ -348,7 +348,7 @@ ridge.subset_1se &lt;- predict(ridge.subset, s = &quot;lambda.1se&quot;, newx = 
 <div id="the-elastic-net" class="section level1">
 <h1>The elastic net</h1>
 <hr />
-<p>Instead of fitting thes</p>
+<p>Instead of fitting the lasso and ridge regressions seperately, we can simultanous optimize the <span class="math inline">\(L1\)</span> and <span class="math inline">\(L2\)</span> norms. We then have to specify the ratio between these norms. That is done with <code>alpha</code> where <span class="math inline">\(0\leq\alpha\leq1\)</span> and an <code>alpha = 0</code> would mean ridge regression and an <code>alpha = 1</code> indicates the lasso.</p>
 <hr />
 <ol start="8" style="list-style-type: decimal">
 <li><strong>Fit an elastic net on the <code>train</code> data (not the subset) and set <code>alpha = 0.5</code>. Does performance on the <code>test</code> data increase?</strong></li>
@@ -583,7 +583,7 @@ confusionMatrix(factor(pred), test$am)</code></pre>
 </div>
 <div id="gene-expression-data" class="section level1">
 <h1>Gene expression data</h1>
-<p>The data file we will be working with is gene expression data. Using microarrays, the expression of many genes can be measured at the same time. The data file contains expressions for 54675 genes with IDs such as <code>1007_s_at</code>, <code>202896_s_at</code>, <code>AFFX-r2-P1-cre-3_at</code>. (NB: these IDs are specific for this type of chip and need to be converted to actual gene names before they can be looked up in a database such as “GeneCards”). The values in the data file are related to the amount of RNA belonging to each gene found in the tissue sample.</p>
+<p>The data file we will be working with is the <a href="https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6694">gene expression data</a>. Using microarrays, the expression of many genes can be measured at the same time. The data file contains expressions for 54675 genes with IDs such as <code>1007_s_at</code>, <code>202896_s_at</code>, <code>AFFX-r2-P1-cre-3_at</code>. (NB: these IDs are specific for this type of chip and need to be converted to actual gene names before they can be looked up in a database such as “GeneCards”). The values in the data file are related to the amount of RNA belonging to each gene found in the tissue sample.</p>
 <p>The goal of the study for which this data was collected is one of exploratory cancer classification: are there differences in gene expression between tissue samples of human prostates with and without prostate cancer?</p>
 <p><strong>CHALLENGE: Use the <code>challenge.zip</code> archive on the course website to predict <code>Disease</code> from a huge set of genotypes as accurately as possible using either ridge regression, lasso regression or a combination thereof (elastic net or hacky way).</strong></p>
 <p>Rules:</p>

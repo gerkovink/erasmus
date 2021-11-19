@@ -1,0 +1,162 @@
+---
+title: "Exercises H"
+author: "Gerko Vink"
+date: "Data Science and Predictive Machine Learning"
+output: html_document
+---
+
+# Introduction
+
+---
+
+In this practical, we will continue with regularized regression. We need the following packages:
+```{r packages, warning = FALSE, message = FALSE}
+library(magrittr)
+library(dplyr)
+library(GGally)
+library(glmnet)
+library(caret)
+library(plotmo)
+library(coefplot)
+```
+
+---
+
+We continue with the previous practical. For convenience, I have prepared an image with all necessary objects and functions from the previous practical so that we continue where we left off. 
+
+To load that workspace image, run the below code block.
+```{r}
+con <- url("https://www.gerkovink.com/erasmus/Day%203/Part%20H/load_all_objects.RData")
+load(con)
+```
+
+
+The comparison in the previous practical was between OLS and Ridge regression for the `mtc` data. The `mtc` data set is our recoded version of the `mtcars` data, where the binary columns are set to factors. We created a training set (`train`) and a test set (`test`) based on this `mtc` data. If you recall, OLS performed worse than ridge regression
+
+```{r}
+postResample(pred, test$hp) # lm()
+postResample(ridge_min, test$hp) # ridge with \lambda_min
+postResample(ridge_1se, test$hp) # ridge with \lambda_1se
+```
+
+---
+
+Before starting with the exercises, it is a good idea to set your RNG seed, so that (1) your answers are reproducible and (2) you can compare your answers with the answers provided. 
+
+```{r seed}
+set.seed(123)
+```
+
+---
+
+1. __Fit a lasso on the training data. Name the object `fit.lasso`. Do not do crossvalidation, yet.__
+
+---
+
+2. __Inspect the plots on the fitted object. Use different x-axes.__
+
+
+---
+
+The function `plot_glmnet()` from package `plotmo` has a nicer - but very similar - plot class. I often prefer these plots over the native `plot.glmnet()`
+
+---
+
+3. __Recreate the plots from (2) with `plot_glmnet()`.__
+
+---
+
+4. __Train a lasso regression model on the `train` data set. Name the resulting object `lasso`. Use 4-fold crossvalidation, just like with ridge regression.__ 
+
+---
+
+5. __Find out which value of $\lambda$ yields the lowest cross-validated error. Do a visual and a numeric inspection.__
+
+---
+
+6. __Add the performance of the lasso regression to the comparison made earlier. Does the lasso perform better than ridge regression?__
+
+
+---
+
+7. __Rerun the crossvalidated ridge regression again, but now only with the paramaters selected by the lasso regression. Does performance increase?__
+
+---
+
+# The elastic net
+
+---
+
+Instead of fitting the lasso and ridge regressions seperately, we can simultanous optimize the $L1$ and $L2$ norms. We then have to specify the ratio between these norms. That is done with `alpha` where $0\leq\alpha\leq1$ and an `alpha = 0` would mean ridge regression and an `alpha = 1` indicates the lasso. 
+
+---
+
+8. __Fit an elastic net on the `train` data (not the subset) and set `alpha = 0.5`. Does performance on the `test` data increase?__
+
+---
+
+**Different levels of `alpha`** will yield different performance. So, just like $\lambda$, $\alpha$ is a hyperparameter that can be optimized. 
+
+
+---
+
+9. __Train an elastic net model using `caret`. Can you find a combination of `alpha` (between 0.1 and 1 in steps of .1) and `lambda` (between 0.1 and 30 in steps of 1) that yields a better predictive performance than the one currently obtained?__
+
+---
+
+10. __Use the `alpha` and `lambda` obtained in the previous exercise to generate predictions with `glmnet`. Is the performance the same?__
+
+---
+
+11. __Apply lasso regression to the prediction of `am` (automatic or manual cars) based on the following design matrix. Use the same train/test split__
+
+---
+
+12. __Inspect the lambda trace with `plot()`. What are the optimum values for `lambda`?__
+
+---
+
+13. __Can you reasonably predict the values of `am` with this model?__
+
+---
+
+14. __Inspect the confusion matrix? Is the performance still good?__
+
+---
+
+
+15. __How would a logistic model have performed?__
+
+---
+
+# Final challenge for today
+
+---
+
+### Gene expression data
+
+The data file we will be working with is [gene expression data](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6694). Using microarrays, the expression of many genes can be measured at the same time. The data file contains expressions for 54675 genes with IDs such as `1007_s_at`, `202896_s_at`, `AFFX-r2-P1-cre-3_at`. (NB: these IDs are specific for this type of chip and need to be converted to actual gene names before they can be looked up in a database such as "GeneCards"). The values in the data file are related to the amount of RNA belonging to each gene found in the tissue sample.
+
+
+The goal of the study for which this data was collected is one of exploratory cancer classification: are there differences in gene expression between tissue samples of human prostates with and without prostate cancer?
+
+**CHALLENGE: Use the `challenge.zip` archive on the course website to predict `Disease` from a huge set of genotypes as accurately as possible using either ridge regression, lasso regression or a combination thereof (elastic net or hacky way).**
+
+Rules: 
+
+- Code must be submitted to me at G.Vink@uu.nl - use the `challenge.Rmd` file online
+- use `glmnet` or `caret`
+- Fix your seed
+- Use a 80/20 train/test split
+- Train your model on the training set
+- Performance is calculated on the test set
+- Lowest RMSE wins!
+- Deadline is today at 5pm
+
+The best performing model will be awarded a prize next week (or per mail) 
+
+---
+
+End of Practical
+
+

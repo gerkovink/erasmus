@@ -209,7 +209,7 @@ we see that performance has indeed increased by making use of both $L_1$ and $L_
 
 ---
 
-Instead of fitting thes
+Instead of fitting the lasso and ridge regressions seperately, we can simultanous optimize the $L1$ and $L2$ norms. We then have to specify the ratio between these norms. That is done with `alpha` where $0\leq\alpha\leq1$ and an `alpha = 0` would mean ridge regression and an `alpha = 1` indicates the lasso. 
 
 ---
 
@@ -396,7 +396,7 @@ A logistic model in this case performed the same, but with a lot of algorithmic 
 
 # Gene expression data
 
-The data file we will be working with is gene expression data. Using microarrays, the expression of many genes can be measured at the same time. The data file contains expressions for 54675 genes with IDs such as `1007_s_at`, `202896_s_at`, `AFFX-r2-P1-cre-3_at`. (NB: these IDs are specific for this type of chip and need to be converted to actual gene names before they can be looked up in a database such as "GeneCards"). The values in the data file are related to the amount of RNA belonging to each gene found in the tissue sample.
+The data file we will be working with is the [gene expression data](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6694). Using microarrays, the expression of many genes can be measured at the same time. The data file contains expressions for 54675 genes with IDs such as `1007_s_at`, `202896_s_at`, `AFFX-r2-P1-cre-3_at`. (NB: these IDs are specific for this type of chip and need to be converted to actual gene names before they can be looked up in a database such as "GeneCards"). The values in the data file are related to the amount of RNA belonging to each gene found in the tissue sample.
 
 
 The goal of the study for which this data was collected is one of exploratory cancer classification: are there differences in gene expression between tissue samples of human prostates with and without prostate cancer?
