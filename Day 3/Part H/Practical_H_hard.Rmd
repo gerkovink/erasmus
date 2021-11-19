@@ -79,7 +79,7 @@ The function `plot_glmnet()` from package `plotmo` has a nicer - but very simila
 
 ---
 
-7. __Rerun the crossvalidated ridge regression again, but now only with the paramaters selected by the lasso regression. Does performance increase?__
+7. __Rerun the crossvalidated ridge regression again, but now only with the parameters selected by the lasso regression. Does performance increase?__
 
 ---
 

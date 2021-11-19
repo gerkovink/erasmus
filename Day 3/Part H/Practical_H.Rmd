@@ -173,7 +173,7 @@ ridge %>% coef(s = "lambda.1se")
 
 ---
 
-7. __Rerun the crossvalidated ridge regression again, but now only with the paramaters selected by the lasso regression. Does performance increase?__
+7. __Rerun the crossvalidated ridge regression again, but now only with the parameters selected by the lasso regression. Does performance increase?__
 
 ---
 
@@ -337,7 +337,8 @@ Let's inspect the model, despite the warnings earlier
 ```{r}
 plot(fit)
 ```
-The deviance stays realtively constant at the beginning, but increases steeply when $\lambda$ becomes larger.
+
+The deviance stays relatively constant at the beginning, but increases steeply when $\lambda$ becomes larger.
 
 The optimal values for $\lambda$ are 
 ```{r}
