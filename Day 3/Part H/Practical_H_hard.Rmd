@@ -144,14 +144,14 @@ The goal of the study for which this data was collected is one of exploratory ca
 
 Rules: 
 
-- Code must be submitted to me at G.Vink@uu.nl - use the `challenge.Rmd` file online
+- Code must be submitted to me at G.Vink@uu.nl - use the `challenge.Rmd` file from the challenge archive
 - use `glmnet` or `caret`
 - Fix your seed
 - Use a 80/20 train/test split
 - Train your model on the training set
 - Performance is calculated on the test set
 - Lowest RMSE wins!
-- Deadline is today at 5pm
+- Deadline is Wednesday at 5pm
 
 The best performing model will be awarded a prize next week (or per mail) 
 
