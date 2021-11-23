@@ -150,7 +150,7 @@ Rules:
 - Use a 80/20 train/test split
 - Train your model on the training set
 - Performance is calculated on the test set
-- Lowest RMSE wins!
+- Highest Accuracy with highest Kappa wins!
 - Deadline is Wednesday at 5pm
 
 The best performing model will be awarded a prize next week (or per mail) 
