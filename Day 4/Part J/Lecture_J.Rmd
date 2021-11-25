@@ -18,6 +18,7 @@ library(DT)       # interactive tables
 library(readr)    # reading in csv
 library(rpart)    # trees
 library(rpart.plot) # plotting trees
+library(pROC)     # ROC curves
 set.seed(123)     # for reproducibility
 ```
 
@@ -265,19 +266,9 @@ boost <- train(Survived ~ Age + Pclass + Sex,
 boost
 ```
 
-## Boosting importance
+## Boosting performance
 ```{r fig.height=4}
 plot(boost)
-```
-
-## ROC
-```{r}
-library(MLeval)
-metrics <- evalm(boost)
-```
-## ROC
-```{r}
-metrics$roc
 ```
 
 ## Disclaimer
