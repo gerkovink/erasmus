@@ -1,0 +1,416 @@
+---
+title: "Practical J"
+author: "Gerko Vink"
+date: "Data Science and Predictive Machine Learning"
+output: 
+   html_document:
+    toc: true
+    toc_depth: 5
+    toc_float: true
+    number_sections: false
+---
+  
+<style type="text/css">
+  
+body{ /* Normal  */
+  font-size: 12px;
+  }
+td {  /* Table  */
+  font-size: 12px;
+}
+h1.title {
+  font-size: 18px;
+  color: DarkBlue;
+}
+h1 { /* Header 1 */
+  font-size: 18px;
+}
+h2 { /* Header 2 */
+  font-size: 18px;
+}
+h3 { /* Header 3 */
+  font-size: 18px;
+}
+code.r{ /* Code block */
+  font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+  font-size: 14px;
+}
+</style>
+
+We use the following packages:
+```{r packages, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(magrittr)
+library(psych)
+library(caret)
+library(gbm)
+library(xgboost)
+library(data.table)
+library(ggforce)
+```
+
+# Introduction
+
+Today, we will learn how to use different ensemble methods in `R`, recap on how to evaluate the performance of the methods, and learn how we can substantively interpret the model output.
+
+In this practical we will work with the ILPD (Indian Liver Patient Dataset) from the UCI Machine Learning Repository (you can find the data [here](https://archive.ics.uci.edu/ml/datasets/ILPD+(Indian+Liver+Patient+Dataset))). This data set contains data on 414 liver disease patients, and 165 non-patients. In general, medical researchers have two distinct goals when doing research: (1) to be able to classify people in their waiting room as either patients or non-patients, and (2) get insight into the factors that are associated with the disease. In this practical, we will look at both aspects. 
+
+In this practical, we will use the `tidyverse`, `magrittr`, `psych`, `GGally` and `caret` libraries. 
+
+```{r, make-data, include = F}
+set.seed(1)
+dat <- read_csv(file = "raw_data/Indian Liver Patient Dataset (ILPD).csv",
+                col_names = c("Age", "Gender", "Total_Bilirubin", "Direct_Bilirubin",
+                              "Alkaline_Phosphotase", "Alamine_Aminotransferase",
+                              "Aspartate_Aminotransferase", "Total_Protiens",
+                              "Albumin", "Ratio_Albumin_Globulin", "Disease"),
+                col_types = "dfddddddddf")
+
+dat <- 
+  dat %<>%
+  mutate(Gender = factor(Gender, levels = c("Male", "Female")),
+         Disease = factor(Disease, levels = c(1, 2), labels = c("Healthy", "Disease")))
+
+dat <- na.omit(dat)
+
+train <- sample(1:nrow(dat), 500)
+
+saveRDS(dat[train, ], file = "data/train_disease.RDS")
+saveRDS(dat[-train, ], file = "data/test_disease.RDS")
+```
+
+I have prepared the training and test data sets for you. You can load them in by running the following code block. 
+```{r}
+
+```
+
+We will use these data sets to make inferences and to train a prediction model.
+
+Before we continue, we fix the random number generator seed. 
+
+```{r seed}
+set.seed(123)
+```
+
+---
+
+__1. Get an impression of the data by looking at the structure of the data and creating some descriptive statistics.__
+
+```{r explore-data, include = TRUE}
+head(df)
+tail(df)
+
+df %>%
+  select(-c(Gender, Disease)) %>%
+  describeBy(df$Disease, fast = TRUE)
+
+# It becomes directly clear that there are substantial differences between
+# the diseased and non-diseased in the data.
+```
+
+---
+
+__2. To further explore the data we work with, create some interesting data visualizations that show whether there are interesting patterns in the data.__
+
+*Hint:* Think about adding a color aesthetic for the variable `Disease`.
+
+```{r exploratory-viz, include = TRUE, cache = TRUE}
+df %>%
+  select(-Gender) %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = value, col = Disease, fill = Disease)) +
+  geom_boxplot(alpha = 0.8) +
+  facet_wrap(~name, scales = "free") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_minimal()
+
+df %>%
+  select(-Gender) %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = value, col = Disease, fill = Disease)) +
+  geom_density(alpha = 0.8) +
+  facet_wrap(~name, scales = "free") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_minimal()
+
+
+prop.table(table(df$Gender, df$Disease), margin = 1) %>%
+  as.data.frame %>%
+  select(Gender = Var1, Disease = Var2, `Relative Frequency` = Freq) %>%
+  ggplot(aes(y = `Relative Frequency`, x = Gender, col = Disease, fill = Disease)) +
+  geom_histogram(alpha = 0.8, stat = "identity", position = "dodge") +
+  scale_fill_brewer(palette = "Paired") +
+  scale_color_brewer(palette = "Paired") +
+  theme_minimal()
+
+## There are some differences between distributions for the two
+## Disease categories, but the differences do not seem to be dramatic.
+## Additionally, there are relatively more women with the liver 
+## disease than men.
+```
+
+---
+
+__3. Shortly reflect on the difference between bagging, random forests, and boosting.__
+
+```{r ensemble-methods, include = TRUE}
+## Bagging:       fit a regression tree to N bootstrap samples of the training data
+##                take the average of all classification trees to base predictions on
+##                Note: out-of-bag data can serve as internal validation set.
+
+## Random forest: Similarly to bagging, classification trees are trained on 
+##                a bootstrap sample of the data. However, the decision trees
+##                are trained using less than all features in the data. 
+
+## Boosting:      We build a decision tree sequentially. Given the current
+##                we fit a (small) tree on the residuals of the current model, 
+##                rather than on the outcome Y
+```
+
+---
+
+We are going to apply different machine learning models using the `caret` package. 
+
+__4. Apply bagging to the training data, to predict the outcome `Disease`, using the `caret` library.__
+
+*Note.* We first specify the internal validation settings, like so:
+
+```{r cross-validation-settings}
+cvcontrol <- trainControl(method = "repeatedcv", 
+                          number = 10,
+                          allowParallel = TRUE)
+```
+
+These settings can be inserted within the `train` function from the `caret` package. Make sure to use the `treebag` method, to specify `cvcontrol` as the `trControl` argument and to set `importance = TRUE`.
+
+```{r train-bag, include = TRUE}
+bag_train <- train(Disease ~ .,
+                   data = df, 
+                   method = 'treebag',
+                   trControl = cvcontrol,
+                   importance = TRUE)
+```
+
+
+---
+
+__5. Interpret the variable importance measure using the `varImp` function on the trained model object.__
+
+```{r bag-importance, include = TRUE}
+bag_train %>%
+  varImp %>%
+  plot
+```
+
+---
+
+__6. Create training set predictions based on the bagged model, and use the `confusionMatrix()` function from the `caret` package to assess it's performance.`__
+
+*Hint: You will have to create predictions based on the trained model for the training data, and evaluate these against the observed values of the training data.*
+
+```{r bag-training-predictions, include = TRUE}
+confusionMatrix(predict(bag_train, type = "raw"),
+                df$Disease)
+
+## We have achieved a perfect training set performance. However, this shows
+## nothing more than that we have been able to train the model. We need to
+## evaluate our 
+```
+
+__7. Now ask for the output of the bagged model. Explain why the under both approaches differ.__
+
+```{r show-bag, include = TRUE}
+bag_train
+```
+
+
+---
+
+We will now follow the same approach, but rather than bagging, we will train a random forest on the training data. 
+
+---
+
+__8. Fit a random forest to the training data to predict the outcome `Disease`, using the `caret` library.__
+
+*Note.* Use the same `cvcontrol` settings as in the previous model.
+
+```{r train-rf, include = TRUE}
+rf_train <- train(Disease ~ .,
+                  data = df, 
+                  method = 'rf',
+                  trControl = cvcontrol,
+                  importance = TRUE)
+```
+
+---
+
+__9. Again, interpret the variable importance measure using the `varImp` function on the trained model object. Do you draw the same conclusions as under the bagged model?__
+
+```{r rf-importance, include = TRUE}
+rf_train %>%
+  varImp %>%
+  plot
+
+## The random forest model indicates that other variables are more important,
+## as compared to the bagged model.
+```
+---
+
+__10. Output the model output from the random forest. Are we doing better than with the bagged model?__
+
+```{r show-rf, include = TRUE}
+rf_train
+
+## Yes, the most accurate model indicates that we do just slightly better than
+## with the bagged model. However, this might well be due to chance.
+```
+
+---
+
+__11. Now, fit a boosting model using the `caret` library to predict disease status.`__
+
+*Hint:* Use gradient boosting (the `gbm` method in `caret`).
+
+```{r fit-gbm, include = TRUE, message = FALSE}
+gbm_train <- train(Disease ~ .,
+                   data = df,
+                   method = "gbm",
+                   verbose = F,
+                   trControl = cvcontrol)
+```
+
+---
+
+__12. Again, interpret the variable importance measure. You will have to call for `summary()` on the model object you just created. Compare the output to the previously obtained variable importance measures.__
+
+```{r gbm_importance, include = TRUE}
+summary(gbm_train)
+```
+
+---
+
+__13. Output the model output from our gradient boosting procedure. Are we doing better than with the bagged and random forest model?__
+
+```{r show-gbm, include = TRUE}
+gbm_train
+
+# Yes, our best model is doing slightly better then the previous two models.
+# However, this might still be random variation.
+```
+
+---
+
+For now, we will continue with extreme gradient boosting, although we will use a difference procedure.
+
+
+We will use `xgboost` to train a binary classification model, and create some visualizations to obtain additional insight in our model. We will create the visualizations using `SHAP` (**SH**apley **A**dditive ex**P**lanations) values, which are a measure of importance of the variables in the model. In fact, `SHAP` values indicate the influence of each input variable on the predicted probability for each person. Essentially, these give an indication of the difference between the predicted probability with and without that variable, for each person's score.
+
+---
+
+__14. Download the file `shap.R` from [this](https://github.com/pablo14/shap-values) Github repository.__
+
+*Note.* There are multiple ways to this, of which the simplest is to run the following code. 
+
+```{r download-shap-functions, message = FALSE}
+library(devtools)
+source_url("https://github.com/pablo14/shap-values/blob/master/shap.R?raw=TRUE")
+```
+
+
+Additionally, you could simply go to the file `shap.R` and copy-and-paste the code into the current repository. However, you could also fork and clone the repository, to make adjustments to the functions that are already created.
+
+---
+
+
+__15. Specify your model as follows, and use it to create predictions on the training data.__
+
+```{r xgboost, results = FALSE, message = FALSE}
+train_x <- model.matrix(Disease ~ ., df)[,-1]
+train_y <- as.numeric(df$Disease) - 1
+xgboost_train <- xgboost(data = train_x,
+                         label = train_y, 
+                         max.depth = 10,
+                         eta = 1,
+                         nthread = 4,
+                         nrounds = 4,
+                         objective = "binary:logistic",
+                         verbose = 2)
+
+
+
+pred <- tibble(Disease = predict(xgboost_train, newdata = train_x)) %>%
+  mutate(Disease = factor(ifelse(Disease < 0.5, 1, 2),
+                          labels = c("Healthy", "Disease")))
+
+table(pred$Disease, df$Disease)
+```
+
+---
+
+__16. First, calculate the `SHAP` rank scores for all variables in the data, and create a variable importance plot using these values. Interpret the plot.__
+
+```{r make-shap, results = TRUE, fig.show='hide'}
+shap_results <- shap.score.rank(xgboost_train,
+                                X_train = train_x,
+                                shap_approx = F)
+
+var_importance(shap_results)
+```
+
+---
+
+__17. Plot the `SHAP` values for every individual for every feature and interpret them.__
+
+```{r shap-plots, results = TRUE}
+shap_long <- shap.prep(shap = shap_results,
+                       X_train = train_x)
+
+plot.shap.summary(shap_long)
+
+xgb.plot.shap(train_x, features = colnames(train_x), model = xgboost_train, n_col = 3)
+```
+
+```{r plot-interpretation, include = TRUE}
+## The first plot shows, for example, that those with a high value for 
+## Direct_Bilirubin have a lower probability of being diseased. Also,
+## Those with a higher age have a lower probability of being diseased,
+## while those with a higher Albumin have a higher probability of being diseased.
+
+## The second set of plots displays the marginal relationships of the SHAP values with the predictors. This conveys the same information, but in greater detail. The interpretability may be a bit tricky for the inexperienced data analyst. 
+```
+
+---
+
+__18. Verify which of the models you created in this practical performs best on the test data.__
+
+```{r test-models, include = TRUE}
+test <- readRDS("data/test_disease.RDS")
+
+bag_test <- predict(bag_train, newdata = test)
+rf_test  <- predict(rf_train, newdata = test)
+gbm_test <- predict(gbm_train, newdata = test)
+xgb_test <- predict(xgboost_train, newdata = model.matrix(Disease ~ ., test)[,-1]) %>%
+  factor(x = ifelse(. < 0.5, 1, 2), levels = c(1,2), labels = c("Healthy", "Disease"))
+
+list(bag_test, 
+     rf_test, 
+     gbm_test, 
+     xgb_test) %>%
+  map(~ confusionMatrix(.x, test$Disease))
+```
+
+---
+
+# Hand-in
+
+When you have finished the practical, 
+
+- enclose all files of the project `09_ensemble.Rproj` (i.e. all `.R` and/or `.Rmd` files including the one with your answers, and the `.Rproj` file) in a zip file, and 
+
+- hand in the zip by PR from your fork [here](https://github.com/gerkovink/INFOMDA1-2021). Try do so as soon as possible. 
+
+---

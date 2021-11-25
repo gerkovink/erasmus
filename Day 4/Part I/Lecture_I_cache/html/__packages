@@ -1,0 +1,9 @@
+base
+MASS
+magrittr
+dplyr
+ggplot2
+lattice
+caret
+e1071
+DT
