@@ -338,6 +338,21 @@ load(con)</code></pre>
 <p><em>Note.</em> There are multiple ways to this, of which the simplest is to run the following code.</p>
 <hr />
 <p><strong>15. Specify your model as follows, and use it to create predictions on the training data.</strong></p>
+<pre class="r"><code>train_x &lt;- model.matrix(Disease ~ ., train)[,-1]
+train_y &lt;- as.numeric(train$Disease) - 1
+xgboost_train &lt;- xgboost(data = train_x,
+                         label = train_y, 
+                         max.depth = 10,
+                         eta = 1,
+                         nthread = 4,
+                         nrounds = 4,
+                         objective = &quot;binary:logistic&quot;,
+                         verbose = 2)
+
+pred &lt;- tibble(Disease = predict(xgboost_train, newdata = train_x)) %&gt;%
+  mutate(Disease = factor(ifelse(Disease &lt; 0.5, 1, 2),
+                          labels = c(&quot;Healthy&quot;, &quot;Disease&quot;)))
+confusionMatrix(pred$Disease, train$Disease)</code></pre>
 <hr />
 <p><strong>16. First, calculate the <code>SHAP</code> rank scores for all variables in the data, and create a variable importance plot using these values. Interpret the plot.</strong></p>
 <hr />

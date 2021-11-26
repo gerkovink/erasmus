@@ -183,6 +183,23 @@ __14. Download the file `shap.R` from [this](https://github.com/pablo14/shap-val
 ---
 
 __15. Specify your model as follows, and use it to create predictions on the training data.__
+```{r xgboost, results = FALSE, message = FALSE}
+train_x <- model.matrix(Disease ~ ., train)[,-1]
+train_y <- as.numeric(train$Disease) - 1
+xgboost_train <- xgboost(data = train_x,
+                         label = train_y, 
+                         max.depth = 10,
+                         eta = 1,
+                         nthread = 4,
+                         nrounds = 4,
+                         objective = "binary:logistic",
+                         verbose = 2)
+
+pred <- tibble(Disease = predict(xgboost_train, newdata = train_x)) %>%
+  mutate(Disease = factor(ifelse(Disease < 0.5, 1, 2),
+                          labels = c("Healthy", "Disease")))
+confusionMatrix(pred$Disease, train$Disease)
+```
 
 ---
 
