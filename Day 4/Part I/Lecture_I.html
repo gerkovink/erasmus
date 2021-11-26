@@ -207,7 +207,8 @@ slide:not(.current) .plotly.html-widget{
 library(magrittr) # pipes
 library(dplyr)    # data manipulation
 library(caret)    # flexible machine learning
-library(e1071)    # for SVM&#39;s
+library(kernlab)  # for SVM&#39;s
+library(e1071)    # also for SVM&#39;s
 library(DT)       # interactive tables
 set.seed(123)     # for reproducibility</pre>
 
@@ -322,7 +323,7 @@ A hyperplane is a subspace whose dimension is one less than that of its ambient 
 <ul>
 <li>When \(\varepsilon_i = 0\) then the \(i\)th observation is on the correct side of the margin.</li>
 <li>When \(\varepsilon_i &gt; 0\) then the \(i\)th observation is on the wrong side of the margin.</li>
-<li>When \(\varepsilon_i &gt; 1\) then the \(i\)th observation is on the correct side of the hyperplane.</li>
+<li>When \(\varepsilon_i &gt; 1\) then the \(i\)th observation is on the wrong side of the hyperplane.</li>
 </ul>
 
 <p>You can imagine that the wider we choose the margins, the higher the sum of the \(\varepsilon_i\)’s. <br><br> To bound the sum of the \(\varepsilon_i\)’s we need a tuning parameter \(C\).</p>
@@ -363,7 +364,7 @@ A hyperplane is a subspace whose dimension is one less than that of its ambient 
 <li>It is a so-called <strong>hard classifier</strong></li>
 </ul>
 
-<p><strong>The maximal margin classifier</strong> creates a hyperplane that maximizes the margins towards the support vectors</p>
+<p><strong>The support vector classifier</strong> creates a hyperplane that maximizes the margins towards the support vectors</p>
 
 <ul>
 <li>It works if and only if classes are linearly seperable</li>

@@ -15,7 +15,8 @@ library(MASS)     # for the cats data
 library(magrittr) # pipes
 library(dplyr)    # data manipulation
 library(caret)    # flexible machine learning
-library(e1071)    # for SVM's
+library(kernlab)  # for SVM's
+library(e1071)    # also for SVM's
 library(DT)       # interactive tables
 set.seed(123)     # for reproducibility
 ```
@@ -107,7 +108,7 @@ To allow for individual to be on the wrong side of both the hyperplane and the m
 
 - When $\varepsilon_i = 0$ then the $i$th observation is on the correct side of the margin.
 - When $\varepsilon_i > 0$ then the $i$th observation is on the wrong side of the margin.
-- When $\varepsilon_i > 1$ then the $i$th observation is on the correct side of the hyperplane.
+- When $\varepsilon_i > 1$ then the $i$th observation is on the wrong side of the hyperplane.
 
 You can imagine that the wider we choose the margins, the higher the sum of the $\varepsilon_i$'s. 
 <br><br>
@@ -143,7 +144,7 @@ The support vector classifier is a linear classifier: It can not classify non-li
 - It is highly sensitive to individual observations
 - It is a so-called **hard classifier**
 
-**The maximal margin classifier** creates a hyperplane that maximizes the margins towards the support vectors
+**The support vector classifier** creates a hyperplane that maximizes the margins towards the support vectors
 
 - It works if and only if classes are linearly seperable
 - It is not sensitive to individual observations
