@@ -112,8 +112,9 @@ To allow for individual to be on the wrong side of both the hyperplane and the m
 You can imagine that the wider we choose the margins, the higher the sum of the $\varepsilon_i$'s. 
 <br><br>
 To bound the sum of the $\varepsilon_i$'s we need a tuning parameter $C$. 
+
 - $C$ determines the number and severity of the violations to the margin (and to the hyperplane) that we will tolerate.
-- If $C = 0$ then there is no budget for violations to the margin, and it must be the case that $\varepsilon_1 = \dots = \varepsilon_n = 0$.
+- If there is no room for violations to the margin, then it must be the case that $\varepsilon_1 = \dots = \varepsilon_n = 0$. In that case $C$ is large.
 
 ## Choosing $C$
 
@@ -171,6 +172,9 @@ If you want to read more about kernels, [this link](https://towardsdatascience.c
 <center>
 ![](img/polynomial_kernel.png){width=80%}
 </center>
+
+With the polynomial kernel we need to optimize over the polynomial degree, $C$ and the scale (variance) $\gamma$. 
+
 
 ## Radial basis function kernel
 <center>
