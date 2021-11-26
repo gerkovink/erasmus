@@ -1,0 +1,95 @@
+---
+title: "Practical I"
+author: "Gerko Vink"
+date: "Data Science and Predictive Machine Learning"
+output: 
+   html_document:
+    toc: true
+    toc_depth: 5
+    toc_float: true
+    number_sections: false
+---
+  
+<style type="text/css">
+  
+body{ /* Normal  */
+  font-size: 12px;
+  }
+td {  /* Table  */
+  font-size: 12px;
+}
+h1.title {
+  font-size: 18px;
+  color: DarkBlue;
+}
+h1 { /* Header 1 */
+  font-size: 18px;
+}
+h2 { /* Header 2 */
+  font-size: 18px;
+}
+h3 { /* Header 3 */
+  font-size: 18px;
+}
+code.r{ /* Code block */
+  font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+  font-size: 14px;
+}
+</style>
+
+We use the following packages:
+```{r packages, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(magrittr)
+library(caret)
+library(kernlab)
+library(MLeval)
+library(pROC)
+```
+
+# Introduction
+Let's take the `titanic` data that we used before and fit the following four models on a training version (70% of cases) of that data set.
+
+1. A logistic regression model
+2. A linear kernel SVM
+3. A polynomial kernel SVM
+4. A radial kernel SVM
+
+Finally, compare the performance of all 4 techniques on the test version (30% of not yet used cases) of that data set. 
+
+---
+
+# Grab the data
+We can use the following code block to directly load the data in our workspace:
+```{r}
+con <- url("https://www.gerkovink.com/erasmus/Day%202/Part%20D/titanic.csv")
+titanic <- read_csv(con)
+```
+
+---
+
+# Prepare the data
+We need to take care of some columns that are not well-coded. Let's make all the measurement levels as they are supposed to be. That means factors into factors, ordered factors into ordered factors, etc. 
+```{r}
+titanic %<>% 
+  mutate(Pclass   = factor(Pclass, 
+                         ordered = TRUE, 
+                         labels = c("1st class", "2nd class", "3rd class")), 
+         Survived = factor(Survived, 
+                           labels = c("Died", "Survived")))
+
+str(titanic)
+```
+The `%<>%` pipe returns the result of the pipe to the object. 
+
+--- 
+
+# Exercise
+Fit the four above mentioned models on the training set and evaluate their performance on the test set. 
+
+---
+
+
+End of Practical

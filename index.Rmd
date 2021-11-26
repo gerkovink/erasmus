@@ -242,11 +242,11 @@ Vandaag behandelen we support vector machines en klassificatie en regressie bome
 - Part G: Support Vector Machines
     - [Lecture I](Day 4/Part I/Lecture_I.html)
     - [Practical I](Day 4/Part I/Practical_I.html)
-    - [Impractical I (zonder antwoorden)]()
+    - [Impractical I (zonder antwoorden)](Day 4/Part I/Practical_I_hard.html)
 - Part F: Trees en Forests
     - [Lecture J](Day 4/Part J/Lecture_J.html)
     - [Practical J](Day 4/Part J/Practical_J.html)
-    - [Impractical J (zonder antwoorden)]()
+    - [Impractical J (zonder antwoorden)](Day 4/Part J/Practical_J_hard.html)
 
 Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen. **Ik heb ook Impracticals gemaakt; dit zijn alleen de opdrachten, zonder de antwoorden.**
 
