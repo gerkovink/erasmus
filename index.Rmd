@@ -262,4 +262,7 @@ Wil je de technieken liever toepassen op je eigen data, dan is daar ook alle mog
 De bovenstaande referenties vormen een mooie praktische toevoeging op de materialen van vandaag. 
 
 ### Questions answered
-Nog niet gevuld.
+Zie onderstaande links:
+
+- [Een hele pagina over PCA](http://factominer.free.fr/index.html)
+- [Mijn oplossing voor de challenge (niet de beste!)](Day 3/Part H/challenge_GV.html)
