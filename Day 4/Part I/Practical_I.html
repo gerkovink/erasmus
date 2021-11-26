@@ -664,8 +664,8 @@ ROC &lt;- roc(predictor = pred.probs$Survived,
 ## </code></pre>
 <hr />
 </div>
-<div id="polynomial-kernel-svm-1" class="section level2">
-<h2>Polynomial kernel SVM</h2>
+<div id="radial-kernel-svm" class="section level2">
+<h2>Radial kernel SVM</h2>
 <p>Let’s train the polynomial kernel support vector machine</p>
 <pre class="r"><code>radialSVM &lt;- train(Survived~., 
                    data = train, 

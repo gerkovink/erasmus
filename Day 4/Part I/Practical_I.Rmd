@@ -235,7 +235,7 @@ confusionMatrix(polySVM.pred, test$Survived)
 
 ---
 
-## Polynomial kernel SVM
+## Radial kernel SVM
 Let's train the polynomial kernel support vector machine
 ```{r radialSVM, cache = TRUE}
 radialSVM <- train(Survived~., 
