@@ -75,15 +75,18 @@ dat <-
 
 dat <- na.omit(dat)
 
-train <- sample(1:nrow(dat), 500)
+trn <- createDataPartition(dat$Disease, p = .8, list = FALSE)
 
-saveRDS(dat[train, ], file = "data/train_disease.RDS")
-saveRDS(dat[-train, ], file = "data/test_disease.RDS")
+train <- dat[trn, ]
+test <- dat[-trn, ]
+  
+save(train, test, file = "train_test.Rdata")
 ```
 
 I have prepared the training and test data sets for you. You can load them in by running the following code block. 
 ```{r}
-
+con <- url("https://www.gerkovink.com/erasmus/Day%204/Part%20J/train_test.Rdata")
+load(con)
 ```
 
 We will use these data sets to make inferences and to train a prediction model.
@@ -96,28 +99,31 @@ set.seed(123)
 
 ---
 
-__1. Get an impression of the data by looking at the structure of the data and creating some descriptive statistics.__
+__1. Get an impression of the training data by looking at the structure of the data and creating some descriptive statistics.__
 
+First we inspect the `head()` and `tail()` of the `train` data
 ```{r explore-data, include = TRUE}
-head(df)
-tail(df)
-
-df %>%
-  select(-c(Gender, Disease)) %>%
-  describeBy(df$Disease, fast = TRUE)
-
-# It becomes directly clear that there are substantial differences between
-# the diseased and non-diseased in the data.
+head(train)
+tail(train)
 ```
+
+We can also obtain descriptive statistics about this data as follows
+```{r}
+train %>%
+  select(-c(Gender, Disease)) %>%
+  describeBy(train$Disease, fast = TRUE)
+```
+It is quite clear that there are substantial differences between the diseased and non-diseased in the data.
 
 ---
 
-__2. To further explore the data we work with, create some interesting data visualizations that show whether there are interesting patterns in the data.__
+__2. To further explore the data for this practical, create some interesting data visualizations that show whether there are interesting patterns in the data.__
 
 *Hint:* Think about adding a color aesthetic for the variable `Disease`.
 
+I give here a set of visualization that I think are informative. There are many more visualization that one could create:
 ```{r exploratory-viz, include = TRUE, cache = TRUE}
-df %>%
+train %>%
   select(-Gender) %>%
   pivot_longer(where(is.numeric)) %>%
   ggplot(aes(x = value, col = Disease, fill = Disease)) +
@@ -127,7 +133,7 @@ df %>%
   scale_fill_brewer(palette = "Paired") +
   theme_minimal()
 
-df %>%
+train %>%
   select(-Gender) %>%
   pivot_longer(where(is.numeric)) %>%
   ggplot(aes(x = value, col = Disease, fill = Disease)) +
@@ -138,7 +144,7 @@ df %>%
   theme_minimal()
 
 
-prop.table(table(df$Gender, df$Disease), margin = 1) %>%
+prop.table(table(train$Gender, train$Disease), margin = 1) %>%
   as.data.frame %>%
   select(Gender = Var1, Disease = Var2, `Relative Frequency` = Freq) %>%
   ggplot(aes(y = `Relative Frequency`, x = Gender, col = Disease, fill = Disease)) +
@@ -146,12 +152,8 @@ prop.table(table(df$Gender, df$Disease), margin = 1) %>%
   scale_fill_brewer(palette = "Paired") +
   scale_color_brewer(palette = "Paired") +
   theme_minimal()
-
-## There are some differences between distributions for the two
-## Disease categories, but the differences do not seem to be dramatic.
-## Additionally, there are relatively more women with the liver 
-## disease than men.
 ```
+From these visualizations we can see differences between the distributions for the two `Disease` categories. However, these differences do not seem to be dramatic. Additionally, there are relatively more women with the liver disease than men.
 
 ---
 
@@ -164,7 +166,7 @@ __3. Shortly reflect on the difference between bagging, random forests, and boos
 
 ## Random forest: Similarly to bagging, classification trees are trained on 
 ##                a bootstrap sample of the data. However, the decision trees
-##                are trained using less than all features in the data. 
+##                are trained using a subset of features from the data. 
 
 ## Boosting:      We build a decision tree sequentially. Given the current
 ##                we fit a (small) tree on the residuals of the current model, 
@@ -174,6 +176,8 @@ __3. Shortly reflect on the difference between bagging, random forests, and boos
 ---
 
 We are going to apply different machine learning models using the `caret` package. 
+
+---
 
 __4. Apply bagging to the training data, to predict the outcome `Disease`, using the `caret` library.__
 
@@ -189,7 +193,7 @@ These settings can be inserted within the `train` function from the `caret` pack
 
 ```{r train-bag, include = TRUE}
 bag_train <- train(Disease ~ .,
-                   data = df, 
+                   data = train, 
                    method = 'treebag',
                    trControl = cvcontrol,
                    importance = TRUE)
@@ -214,19 +218,17 @@ __6. Create training set predictions based on the bagged model, and use the `con
 
 ```{r bag-training-predictions, include = TRUE}
 confusionMatrix(predict(bag_train, type = "raw"),
-                df$Disease)
-
-## We have achieved a perfect training set performance. However, this shows
-## nothing more than that we have been able to train the model. We need to
-## evaluate our 
+                train$Disease)
 ```
+We have realized near-perfect training set performance. However, this shows nothing more than that we have been able to train the model rather well. We need to evaluate our model on the test set before we can draw conclusions about predicive power and test error. 
+
+---
 
 __7. Now ask for the output of the bagged model. Explain why the under both approaches differ.__
 
 ```{r show-bag, include = TRUE}
 bag_train
 ```
-
 
 ---
 
@@ -240,7 +242,7 @@ __8. Fit a random forest to the training data to predict the outcome `Disease`, 
 
 ```{r train-rf, include = TRUE}
 rf_train <- train(Disease ~ .,
-                  data = df, 
+                  data = train, 
                   method = 'rf',
                   trControl = cvcontrol,
                   importance = TRUE)
@@ -254,20 +256,18 @@ __9. Again, interpret the variable importance measure using the `varImp` functio
 rf_train %>%
   varImp %>%
   plot
-
-## The random forest model indicates that other variables are more important,
-## as compared to the bagged model.
 ```
+
+The random forest model `rf_train` indicates a different variable importance than the bagged model `bag_train`. This is due to the random selection of predictors within random forests: the bootstrap-based trees are thus decorrelated. 
+
 ---
 
 __10. Output the model output from the random forest. Are we doing better than with the bagged model?__
 
 ```{r show-rf, include = TRUE}
 rf_train
-
-## Yes, the most accurate model indicates that we do just slightly better than
-## with the bagged model. However, this might well be due to chance.
 ```
+Yes, the most accurate model indicates that we do just slightly better than with the bagged model. However, this might well be due to chance.
 
 ---
 
@@ -277,7 +277,7 @@ __11. Now, fit a boosting model using the `caret` library to predict disease sta
 
 ```{r fit-gbm, include = TRUE, message = FALSE}
 gbm_train <- train(Disease ~ .,
-                   data = df,
+                   data = train,
                    method = "gbm",
                    verbose = F,
                    trControl = cvcontrol)
@@ -297,10 +297,8 @@ __13. Output the model output from our gradient boosting procedure. Are we doing
 
 ```{r show-gbm, include = TRUE}
 gbm_train
-
-# Yes, our best model is doing slightly better then the previous two models.
-# However, this might still be random variation.
 ```
+Yes, our best model is doing slightly better then the previous two models. However, the performance gain is small and might be due to random variation.
 
 ---
 
@@ -316,21 +314,17 @@ __14. Download the file `shap.R` from [this](https://github.com/pablo14/shap-val
 *Note.* There are multiple ways to this, of which the simplest is to run the following code. 
 
 ```{r download-shap-functions, message = FALSE}
-library(devtools)
-source_url("https://github.com/pablo14/shap-values/blob/master/shap.R?raw=TRUE")
+con <- url("https://github.com/pablo14/shap-values/blob/master/shap.R?raw=TRUE")
+source(con)
 ```
 
-
-Additionally, you could simply go to the file `shap.R` and copy-and-paste the code into the current repository. However, you could also fork and clone the repository, to make adjustments to the functions that are already created.
-
 ---
-
 
 __15. Specify your model as follows, and use it to create predictions on the training data.__
 
 ```{r xgboost, results = FALSE, message = FALSE}
-train_x <- model.matrix(Disease ~ ., df)[,-1]
-train_y <- as.numeric(df$Disease) - 1
+train_x <- model.matrix(Disease ~ ., train)[,-1]
+train_y <- as.numeric(train$Disease) - 1
 xgboost_train <- xgboost(data = train_x,
                          label = train_y, 
                          max.depth = 10,
@@ -340,13 +334,10 @@ xgboost_train <- xgboost(data = train_x,
                          objective = "binary:logistic",
                          verbose = 2)
 
-
-
 pred <- tibble(Disease = predict(xgboost_train, newdata = train_x)) %>%
   mutate(Disease = factor(ifelse(Disease < 0.5, 1, 2),
                           labels = c("Healthy", "Disease")))
-
-table(pred$Disease, df$Disease)
+confusionMatrix(pred$Disease, train$Disease)
 ```
 
 ---
@@ -374,43 +365,31 @@ plot.shap.summary(shap_long)
 xgb.plot.shap(train_x, features = colnames(train_x), model = xgboost_train, n_col = 3)
 ```
 
-```{r plot-interpretation, include = TRUE}
-## The first plot shows, for example, that those with a high value for 
-## Direct_Bilirubin have a lower probability of being diseased. Also,
-## Those with a higher age have a lower probability of being diseased,
-## while those with a higher Albumin have a higher probability of being diseased.
+The first plot demonstrates that those with a high value for
+Direct_Bilirubin have a lower probability of being diseased. Also,
+Those with a higher age have a lower probability of being diseased,
+while those with a higher Albumin have a higher probability of being diseased.
 
-## The second set of plots displays the marginal relationships of the SHAP values with the predictors. This conveys the same information, but in greater detail. The interpretability may be a bit tricky for the inexperienced data analyst. 
-```
+The second set of plots displays the marginal relationships of the SHAP values with the predictors. This conveys the same information, but in greater detail. The interpretability may be a bit tricky for the inexperienced data analyst. 
 
 ---
 
 __18. Verify which of the models you created in this practical performs best on the test data.__
 
 ```{r test-models, include = TRUE}
-test <- readRDS("data/test_disease.RDS")
-
 bag_test <- predict(bag_train, newdata = test)
 rf_test  <- predict(rf_train, newdata = test)
 gbm_test <- predict(gbm_train, newdata = test)
 xgb_test <- predict(xgboost_train, newdata = model.matrix(Disease ~ ., test)[,-1]) %>%
   factor(x = ifelse(. < 0.5, 1, 2), levels = c(1,2), labels = c("Healthy", "Disease"))
 
-list(bag_test, 
-     rf_test, 
-     gbm_test, 
-     xgb_test) %>%
+list(`bagging` = bag_test, 
+     `random_forest` = rf_test, 
+     `gradient_boosting` = gbm_test, 
+     `xtreme_gradient_boosting` = xgb_test) %>%
   map(~ confusionMatrix(.x, test$Disease))
 ```
 
 ---
 
-# Hand-in
-
-When you have finished the practical, 
-
-- enclose all files of the project `09_ensemble.Rproj` (i.e. all `.R` and/or `.Rmd` files including the one with your answers, and the `.Rproj` file) in a zip file, and 
-
-- hand in the zip by PR from your fork [here](https://github.com/gerkovink/INFOMDA1-2021). Try do so as soon as possible. 
-
----
+End of Practical

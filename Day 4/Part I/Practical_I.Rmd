@@ -1,0 +1,285 @@
+---
+title: "Practical I"
+author: "Gerko Vink"
+date: "Data Science and Predictive Machine Learning"
+output: 
+   html_document:
+    toc: true
+    toc_depth: 5
+    toc_float: true
+    number_sections: false
+---
+  
+<style type="text/css">
+  
+body{ /* Normal  */
+  font-size: 12px;
+  }
+td {  /* Table  */
+  font-size: 12px;
+}
+h1.title {
+  font-size: 18px;
+  color: DarkBlue;
+}
+h1 { /* Header 1 */
+  font-size: 18px;
+}
+h2 { /* Header 2 */
+  font-size: 18px;
+}
+h3 { /* Header 3 */
+  font-size: 18px;
+}
+code.r{ /* Code block */
+  font-size: 12px;
+}
+pre { /* Code block - determines code spacing between lines */
+  font-size: 14px;
+}
+</style>
+
+We use the following packages:
+```{r packages, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(magrittr)
+library(caret)
+library(kernlab)
+library(MLeval)
+library(pROC)
+```
+
+# Introduction
+Let's take the `titanic` data that we used before and fit the following four models on a training version (70% of cases) of that data set.
+
+1. A logistic regression model
+2. A linear kernel SVM
+3. A polynomial kernel SVM
+4. A radial kernel SVM
+
+Finally, compare the performance of all 4 techniques on the test version (30% of not yet used cases) of that data set. 
+
+---
+
+# Grab the data
+We can use the following code block to directly load the data in our workspace:
+```{r}
+con <- url("https://www.gerkovink.com/erasmus/Day%202/Part%20D/titanic.csv")
+titanic <- read_csv(con)
+```
+
+---
+
+# Prepare the data
+We need to take care of some columns that are not well-coded. Let's make all the measurement levels as they are supposed to be. That means factors into factors, ordered factors into ordered factors, etc. 
+```{r}
+titanic %<>% 
+  mutate(Pclass   = factor(Pclass, 
+                         ordered = TRUE, 
+                         labels = c("1st class", "2nd class", "3rd class")), 
+         Survived = factor(Survived, 
+                           labels = c("Died", "Survived")))
+
+str(titanic)
+```
+The `%<>%` pipe returns the result of the pipe to the object. 
+
+---
+
+# Validation set
+Let's split the titanic data into a training and validation set. Before we do so, we fix the random number generator seed in order to allow for reproduction of our results. Any seed value will do. My favorite seed is `123`.
+```{r}
+set.seed(123)
+```
+Now we can split the data into a `test` and a `training` part. 
+```{r}
+idx <- createDataPartition(titanic$Survived, p = .7, list = FALSE)
+train <- titanic[idx, ]
+test <- titanic[-idx, ]
+```
+
+
+--- 
+
+# Modeling
+
+We now go through the four models where we predict `Survived` from the other features in `titanic` - with the exception of `Name`, naturally. If we would use `Name`, we would fit a zero-residual model: i.e. a model for every row seperately.
+
+For ease of coding we exclude the `Name` column from the `titanic` set. 
+```{r}
+train %<>% select(-Name)
+```
+Again, we use the `%<>%` pipe because it returns the result of the pipe to the object. 
+
+## Linear model
+Let's fit the linear model
+```{r}
+lm.train <- glm(Survived ~ ., 
+                data = train, 
+                family = binomial(link = "logit"))
+```
+And generate the predicted values
+```{r}
+lm.pred <- predict(lm.train, 
+                   newdata = test %>% select(-Name),
+                   type = "response") 
+```
+
+To inspect the performance of the final (and only) model:
+```{r}
+confusionMatrix(ifelse(lm.pred < .5, "Died", "Survived") %>% factor, 
+                test$Survived)
+```
+
+---
+
+## Linear kernel SVM
+Let's train the linear kernel support vector machine
+```{r linearSVM, cache = TRUE}
+train_control <- trainControl(method="repeatedcv", number=10, repeats=3,
+                              savePredictions = TRUE, 
+                              classProbs = TRUE, 
+                              verboseIter = FALSE)
+linearSVM <- train(Survived ~., 
+                  data = train, 
+                  method = "svmLinear", 
+                  trControl = train_control,  
+                  preProcess = c("center","scale"),
+                  tuneGrid = expand.grid(C = seq(0.1, 10, by = .5)))
+```
+When we inspect the object we see that the optimal value for $C$ has been trained to be `r linearSVM$bestTune`
+
+Let's inspect the tuning parameters and the cross-validated performance on the training set. 
+```{r}
+plot(linearSVM)
+```
+Let's also inspect the ROC curve on the cross-validated data:
+```{r}
+plots <- evalm(linearSVM, showplots = FALSE, silent = TRUE)
+plots$roc
+plots$stdres
+```
+The Receiver Operator Characteristic (ROC) curve shows the trade-off between sensitivity - or true positive rate (TPR) - and specificity: 1 – false positive rate (FPR). Classifiers that give curves closer to the top-left corner indicate a better performance. A random classifier is expected to yield predictions that result in a perfect relation between sensitivity and specificity. The ROC curve will then go along the diagonal (where FPR = TPR). The closer the curve comes to the 45-degree diagonal of the ROC space, the less accurate the test.
+
+The ROC does not depend on the class distribution, making it very useful for evaluating classifiers that aim to predict rare events. Rare events are e.g. disease or disasters, where so-called *class balances* are very skewed. Accuracy would then favor classifiers that always predict a negative outcome. 
+
+We can use the area under the ROC curve (AUC) to compare different predictive classifiers. The AUC on the crossvalidated trained model is `.73`.
+
+```{r}
+pred.probs <- predict(linearSVM, 
+                      newdata = test %>% select(-Name), 
+                      type = "prob") 
+ROC <- roc(predictor = pred.probs$Survived,
+           response = test$Survived, 
+           plot = TRUE)
+ROC$auc
+plot(ROC)
+```
+
+Let's generate the predicted values
+```{r}
+linearSVM.pred <- predict(linearSVM, 
+                          newdata = test %>% select(-Name), 
+                          type = "raw") 
+```
+
+To inspect the performance of the final model on the test set:
+```{r}
+confusionMatrix(linearSVM.pred, test$Survived)
+```
+
+---
+
+## Polynomial kernel SVM
+Let's train the polynomial kernel support vector machine
+```{r polySVM, cache = TRUE}
+polySVM <- train(Survived ~., 
+                 data = train, 
+                 method = "svmPoly", 
+                 trControl = train_control,  
+                 preProcess = c("center","scale"),
+                 tuneGrid = expand.grid(C = seq(0.25, 2, by = .25),
+                                        scale = seq(0.1, .3, by = .1),
+                                        degree = c(1:4)))
+```
+
+Let's inspect the tuning parameters and the cross-validated performance on the training set. 
+```{r}
+plot(polySVM)
+polySVM
+```
+
+Inspect the ROC curve of the predictions
+```{r}
+pred.probs <- predict(polySVM, 
+                      newdata = test %>% select(-Name), 
+                      type = "prob") 
+ROC <- roc(predictor = pred.probs$Survived,
+           response = test$Survived, 
+           plot = TRUE)
+ROC$auc
+plot(ROC)
+```
+
+Now we generate the predicted values
+```{r}
+polySVM.pred <- predict(polySVM, 
+                        newdata = test %>% select(-Name), 
+                        type = "raw") 
+```
+
+To inspect the performance of the final model on the test set:
+```{r}
+confusionMatrix(polySVM.pred, test$Survived)
+```
+
+---
+
+## Polynomial kernel SVM
+Let's train the polynomial kernel support vector machine
+```{r radialSVM, cache = TRUE}
+radialSVM <- train(Survived~., 
+                   data = train, 
+                   method = "svmRadial", 
+                   trControl = train_control,  
+                   preProcess = c("center","scale"),
+                   tuneLength = 10)
+```
+Instead of specifying a grid, we can also ask `caret` to utilize a tunelength of `10`. It will then cycle over the hyperparameter grid conform this length. For the linear SVM kernel, there is only tuning parameter $C$; `tunelength` needs more than one tuning parameter to be used. When we inspect the object we see that the optimal value for $C$ has been trained to be `r polySVM$bestTune`
+
+When we inspect the object we see that the optimal value for $C$ has been trained to be `r radialSVM$bestTune`
+
+Let's inspect the tuning parameters and the cross-validated performance on the training set. 
+```{r}
+plot(radialSVM)
+radialSVM
+```
+
+Let's inspect the ROC curve on the predictions
+```{r}
+pred.probs <- predict(radialSVM, 
+                      newdata = test %>% select(-Name), 
+                      type = "prob") 
+ROC <- roc(predictor = pred.probs$Survived,
+           response = test$Survived, 
+           plot = TRUE)
+ROC$auc
+plot(ROC)
+```
+
+And generate the predicted values
+```{r}
+radialSVM.pred <- predict(radialSVM, 
+                          newdata = test %>% select(-Name), 
+                          type = "raw") 
+```
+
+To inspect the performance of the final model on the test set:
+```{r}
+confusionMatrix(radialSVM.pred, test$Survived)
+```
+
+---
+
+
+End of Practical

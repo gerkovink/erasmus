@@ -232,5 +232,34 @@ Wil je de technieken liever toepassen op je eigen data, dan is daar ook alle mog
 De bovenstaande referentie vormen een mooie praktische toevoeging op de materialen van vandaag. 
 
 
+# Dag 4
+
+## Column 1
+
+### Materials
+Vandaag behandelen we support vector machines en klassificatie en regressie bomen. Aan het eind van de middag is er een vrij programma. Hierin kunnen we vragen bespreken over de lesstof, persoonlijke casuistiek inbrengen en op eigen data werken. 
+
+- Part G: Support Vector Machines
+    - [Lecture I](Day 4/Part I/Lecture_I.html)
+    - [Practical I](Day 4/Part I/Practical_I.html)
+    - [Impractical I (zonder antwoorden)]()
+- Part F: Trees en Forests
+    - [Lecture J](Day 4/Part J/Lecture_J.html)
+    - [Practical J](Day 4/Part J/Practical_J.html)
+    - [Impractical J (zonder antwoorden)]()
+
+Alle lectures zijn in `html` format. Practicals zijn *walkthrough files* die je door de oefeningen heen helpen. **Ik heb ook Impracticals gemaakt; dit zijn alleen de opdrachten, zonder de antwoorden.**
+
+Wil je de technieken liever toepassen op je eigen data, dan is daar ook alle mogelijkheid toe. 
+
+## Column 2
+
+### Useful references
+
+- [Het `caret` boek](https://topepo.github.io/caret/index.html)
+- [SVM's gevisualiseerd](https://cs.stanford.edu/~karpathy/svmjs/demo/)
+
+De bovenstaande referenties vormen een mooie praktische toevoeging op de materialen van vandaag. 
+
 ### Questions answered
-Vooralsnog leeg. 
+Nog niet gevuld.
